@@ -174,8 +174,10 @@ func (db *LDBDatabase) Meter(prefix string) {
 
 // meter periodically retrieves internal leveldb counters and reports them to
 // the metrics subsystem.
+// 周期性地收集leveldb内部的各种计数器的值，并且上报给度量子系统
 //
 // This is how a stats table look like (currently):
+// 统计表格就像下面这样子:
 //   Compactions
 //    Level |   Tables   |    Size(MB)   |    Time(sec)  |    Read(MB)   |   Write(MB)
 //   -------+------------+---------------+---------------+---------------+---------------
@@ -185,31 +187,38 @@ func (db *LDBDatabase) Meter(prefix string) {
 //      3   |        570 |    1113.18458 |       0.00000 |       0.00000 |       0.00000
 //
 // This is how the write delay look like (currently):
+// 写入延迟是这样呈现的：
 // DelayN:5 Delay:406.604657ms Paused: false
 //
 // This is how the iostats look like (currently):
+// 输入输出统计是这样呈现的：
 // Read(MB):3895.04860 Write(MB):3654.64712
+// 读了多少M的数据，写入了多少M的数据
 func (db *LDBDatabase) meter(refresh time.Duration) {
 	// Create the counters to store current and previous compaction values
+	// 创建一个二维切片来存储现在和以前压缩的信息，长度和容量都为2，每个元素又是一个float64的切片
 	compactions := make([][]float64, 2)
 	for i := 0; i < 2; i++ {
+		// 把二维切片compactions里面的每个元素设置为一个长度和容量都为3的float64切片
 		compactions[i] = make([]float64, 3)
 	}
 	// Create storage for iostats.
+	// 创建一个长度为2的float64数组来存储iostats信息
 	var iostats [2]float64
 
 	// Create storage and warning log tracer for write delay.
 	var (
-		delaystats      [2]int64
-		lastWritePaused time.Time
+		delaystats      [2]int64 // 声明一个长度为2的int64数组来存储写入延迟的统计数据
+		lastWritePaused time.Time // 上次写入停止的时间点，可能会被打印到日志里面
 	)
 
 	var (
-		errc chan error
-		merr error
+		errc chan error // errc是一个通道，通道里面可以装error类型的数据
+		merr error // // 表示度量收集过程中遇到的error
 	)
 
 	// Iterate ad infinitum and collect the stats
+	// 以无限循环的方式周期性地收集数据库的统计信息
 	for i := 1; errc == nil && merr == nil; i++ {
 		// Retrieve the database stats
 		stats, err := db.db.GetProperty("leveldb.stats")
@@ -335,6 +344,8 @@ func (db *LDBDatabase) meter(refresh time.Duration) {
 		select {
 		case errc = <-db.quitChan:
 			// Quit requesting, stop hammering the database
+			// 当db.quitChan为nil的时候，这个case被阻塞，如果下一条case <-time.After(refresh)成功执行了，那么这条case就不会被执行；
+			// 当db.quitChan不为nil的时候，也就是Close函数执行的时候，加了一个chan error到db.quitChan，那么errc = <-db.quitChan就会成功执行，errc就会被赋值为db.quitChan里的chan error
 		case <-time.After(refresh):
 			// Timeout, gather a new set of stats
 		}
