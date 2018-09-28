@@ -21,32 +21,36 @@ package ethdb
 const IdealBatchSize = 100 * 1024
 
 // Putter wraps the database write operation supported by both batches and regular databases.
+// 定义了写操作，包括普通写操作和批量写操作。
 type Putter interface {
 	Put(key []byte, value []byte) error
 }
 
 // Deleter wraps the database delete operation supported by both batches and regular databases.
+// 定义了删除操作，包括普通删除和批量删除。
 type Deleter interface {
 	Delete(key []byte) error
 }
 
 // Database wraps all database operations. All methods are safe for concurrent use.
+// 数据库接口，定义了以太坊里的所有数据库操作，所有操作都是线程安全的。
 type Database interface {
 	Putter
 	Deleter
-	Get(key []byte) ([]byte, error)
-	Has(key []byte) (bool, error)
-	Close()
-	NewBatch() Batch
+	Get(key []byte) ([]byte, error) // 获取操作，根据键获取值
+	Has(key []byte) (bool, error) // 判断操作，判断键是否在数据库里面存在
+	Close() // 关闭操作
+	NewBatch() Batch // 这个函数返回一个批处理接口
 }
 
 // Batch is a write-only database that commits changes to its host database
 // when Write is called. Batch cannot be used concurrently.
+// 批量写操作接口，可用于添加，修改和删除数据，当ｗｉｒｔｅ函数被调用时，向数据库写入更改。不能并行使用，线程不安全。
 type Batch interface {
 	Putter
 	Deleter
-	ValueSize() int // amount of data in the batch
+	ValueSize() int // amount of data in the batch 代表batch里的数据总数，以字节为单位
 	Write() error
-	// Reset resets the batch for reuse
+	// Reset resets the batch for reuse 重置这个批处理
 	Reset()
 }

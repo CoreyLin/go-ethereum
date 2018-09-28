@@ -29,6 +29,7 @@ import (
 )
 
 func newTestLDB() (*ethdb.LDBDatabase, func()) {
+	// 在操作系统的临时目录下创建一个ethdb_test_开头的文件夹，用于创建leveldb database，返回的dirname是绝对路径
 	dirname, err := ioutil.TempDir(os.TempDir(), "ethdb_test_")
 	if err != nil {
 		panic("failed to create test file: " + err.Error())
@@ -40,7 +41,7 @@ func newTestLDB() (*ethdb.LDBDatabase, func()) {
 
 	return db, func() {
 		db.Close()
-		os.RemoveAll(dirname)
+		os.RemoveAll(dirname) // 删除掉dirname及其子文件夹
 	}
 }
 
@@ -57,10 +58,13 @@ func TestMemoryDB_PutGet(t *testing.T) {
 }
 
 func testPutGet(db ethdb.Database, t *testing.T) {
+	// 调用了t.Parallel()的tests会和其他调用了t.Parallel()的tests并行执行（in parallel）.如果不调用t.Parallel()的话，tests默认是串行执行的
+	// 参考https://nishanths.svbtle.com/parallel-tests-in-go
+	// 在这个package里面，TestLDB_PutGet和TestMemoryDB_PutGet就一起执行
 	t.Parallel()
 
 	for _, k := range test_values {
-		err := db.Put([]byte(k), nil)
+		err := db.Put([]byte(k), nil) // 插入的值可以为nil
 		if err != nil {
 			t.Fatalf("put failed: %v", err)
 		}
@@ -82,7 +86,7 @@ func testPutGet(db ethdb.Database, t *testing.T) {
 	}
 
 	for _, v := range test_values {
-		err := db.Put([]byte(v), []byte(v))
+		err := db.Put([]byte(v), []byte(v)) // 测试键值对的覆盖
 		if err != nil {
 			t.Fatalf("put failed: %v", err)
 		}
@@ -120,7 +124,7 @@ func testPutGet(db ethdb.Database, t *testing.T) {
 		if err != nil {
 			t.Fatalf("get failed: %v", err)
 		}
-		orig[0] = byte(0xff)
+		orig[0] = byte(0xff) // 修改返回的值不会影响数据库中的值
 		data, err := db.Get([]byte(v))
 		if err != nil {
 			t.Fatalf("get failed: %v", err)
