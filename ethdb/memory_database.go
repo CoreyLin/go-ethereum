@@ -23,11 +23,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
+// 这个database是内存数据库，把数据存到内存，不持久化。所以仅仅用于测试目的，不用于生产环境
 /*
  * This is a test memory database. Do not use for any production it does not get persisted
  */
 type MemDatabase struct {
-	db   map[string][]byte
+	db   map[string][]byte // 声明一个map来保存键值对
 	lock sync.RWMutex
 }
 
@@ -47,6 +48,7 @@ func (db *MemDatabase) Put(key []byte, value []byte) error {
 	db.lock.Lock()
 	defer db.lock.Unlock()
 
+	// 使用common.CopyBytes的原因就是生成一个字节切片的拷贝，因为如果直接传字节切片进来的话，原切片改变了，就会影响database map里的值
 	db.db[string(key)] = common.CopyBytes(value)
 	return nil
 }
@@ -138,6 +140,6 @@ func (b *memBatch) ValueSize() int {
 }
 
 func (b *memBatch) Reset() {
-	b.writes = b.writes[:0]
+	b.writes = b.writes[:0] // 把b.writes清空
 	b.size = 0
 }

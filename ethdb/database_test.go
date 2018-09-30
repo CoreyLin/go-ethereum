@@ -164,18 +164,21 @@ func testParallelPutGet(db ethdb.Database, t *testing.T) {
 	var pending sync.WaitGroup
 
 	pending.Add(n)
+	// 测试并行向database里插入8个键值对，测试并行
 	for i := 0; i < n; i++ {
 		go func(key string) {
 			defer pending.Done()
 			err := db.Put([]byte(key), []byte("v"+key))
 			if err != nil {
-				panic("put failed: " + err.Error())
+				panic("put failed: " + err.Error()) // TODO panic改成t.Fatalf，因为panic会让整个程序就退出了，导致后续的测试无法进行
+													// 而t.Fatalf只会让当前的这个测试用例退出
 			}
 		}(strconv.Itoa(i))
 	}
 	pending.Wait()
 
 	pending.Add(n)
+	// 测试并行从database里取8个键的值
 	for i := 0; i < n; i++ {
 		go func(key string) {
 			defer pending.Done()
@@ -191,6 +194,7 @@ func testParallelPutGet(db ethdb.Database, t *testing.T) {
 	pending.Wait()
 
 	pending.Add(n)
+	// 测试并行从database里删除8个键值对
 	for i := 0; i < n; i++ {
 		go func(key string) {
 			defer pending.Done()
@@ -203,6 +207,7 @@ func testParallelPutGet(db ethdb.Database, t *testing.T) {
 	pending.Wait()
 
 	pending.Add(n)
+	// 测试删除之后并行从database里取8个键的值，期望取值失败
 	for i := 0; i < n; i++ {
 		go func(key string) {
 			defer pending.Done()
