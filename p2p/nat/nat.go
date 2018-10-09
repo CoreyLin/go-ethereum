@@ -31,6 +31,7 @@ import (
 
 // An implementation of nat.Interface can map local ports to ports
 // accessible from the Internet.
+// nat.Interface的实现能够把本地端口和互联网能够访问的端口映射起来。
 type Interface interface {
 	// These methods manage a mapping between a port on the local
 	// machine to a port that can be connected to from the internet.
@@ -38,14 +39,18 @@ type Interface interface {
 	// protocol is "UDP" or "TCP". Some implementations allow setting
 	// a display name for the mapping. The mapping may be removed by
 	// the gateway when its lifetime ends.
+	// 这些方法管理本地端口和能够连接到互联网的端口的映射。
+	// protocol参数是UDP或者TCP。有一些实现允许为mapping设置一个显示的名字。当映射的生命周期结束时，可以被网关移除。
 	AddMapping(protocol string, extport, intport int, name string, lifetime time.Duration) error
 	DeleteMapping(protocol string, extport, intport int) error
 
 	// This method should return the external (Internet-facing)
 	// address of the gateway device.
+	// 返回网关设备的外部IP地址（面向互联网的地址）
 	ExternalIP() (net.IP, error)
 
 	// Should return name of the method. This is used for logging.
+	// 返回方法名，用于记录日志
 	String() string
 }
 
@@ -147,6 +152,7 @@ func (extIP) DeleteMapping(string, int, int) error                     { return 
 
 // Any returns a port mapper that tries to discover any supported
 // mechanism on the local network.
+// 返回一个端口映射器，这个映射器试图在本地网络发现任何支持的机制
 func Any() Interface {
 	// TODO: attempt to discover whether the local machine has an
 	// Internet-class address. Return ExtIP in this case.

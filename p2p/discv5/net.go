@@ -766,20 +766,28 @@ func (net *Network) internNodeFromNeighbours(sender *net.UDPAddr, rn rpcNode) (n
 }
 
 // nodeNetGuts is embedded in Node and contains fields.
+// 被嵌入到Node里面，并且包含一些属性
 type nodeNetGuts struct {
 	// This is a cached copy of sha3(ID) which is used for node
 	// distance calculations. This is part of Node in order to make it
 	// possible to write tests that need a node at a certain distance.
 	// In those tests, the content of sha will not actually correspond
 	// with ID.
+	// sha3(ID)的缓存副本，用于节点距离计算。如果测试如果用到某个距离的节点，就可以用这个属性。
+	// 在这种测试里，sha的内容不会和ID一致。
 	sha common.Hash
 
 	// State machine fields. Access to these fields
 	// is restricted to the Network.loop goroutine.
+	// 状态机的属性。对这些属性的访问仅局限于Network.loop goroutine
 	state             *nodeState
+	// 上次发送的ping的hash
 	pingEcho          []byte           // hash of last ping sent by us
+	// 在上次ping里发送的topic
 	pingTopics        []Topic          // topic set sent by us in last ping
+	// 不能再被发送的请求
 	deferredQueries   []*findnodeQuery // queries that can't be sent yet
+	// 当前正在等待回应的请求
 	pendingNeighbours *findnodeQuery   // current query, waiting for reply
 	queryTimeouts     int
 }

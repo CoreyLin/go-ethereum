@@ -23,16 +23,20 @@ import (
 )
 
 // Protocol represents a P2P subprotocol implementation.
+// 代表一个P2P子协议实现
 type Protocol struct {
 	// Name should contain the official protocol name,
 	// often a three-letter word.
+	// 应该包含官方协议名称，往往是一个三个字母的单词
 	Name string
 
 	// Version should contain the version number of the protocol.
+	// 协议的版本
 	Version uint
 
 	// Length should contain the number of message codes used
 	// by the protocol.
+	// 包含被协议用到的消息代码的数量
 	Length uint64
 
 	// Run is called in a new goroutine when the protocol has been
@@ -42,15 +46,21 @@ type Protocol struct {
 	// The peer connection is closed when Start returns. It should return
 	// any protocol-level error (such as an I/O error) that is
 	// encountered.
+	// 当协议被和一个对等节点协商的时候Run在一个新的goroutine里被调用。它应该从rw读取和写入消息。
+	// 每条消息的负载必须被完全消费。
+	// 当Start返回时，对等节点的连接被关闭。它应该返回碰到的任何协议级别的错误（比如I/O错误）
 	Run func(peer *Peer, rw MsgReadWriter) error
 
 	// NodeInfo is an optional helper method to retrieve protocol specific metadata
 	// about the host node.
+	// 是一个用于获取关于主机节点的协议特定的元数据的可选的帮助方法
 	NodeInfo func() interface{}
 
 	// PeerInfo is an optional helper method to retrieve protocol specific metadata
 	// about a certain peer in the network. If an info retrieval function is set,
 	// but returns nil, it is assumed that the protocol handshake is still running.
+	// 是一个用于获取关于某个对等节点的协议特定的元数据的可选的帮助方法。如果一个信息获取函数被设置，但是返回nil，
+	// 那么我们就认为协议握手还在进行中。
 	PeerInfo func(id discover.NodeID) interface{}
 }
 

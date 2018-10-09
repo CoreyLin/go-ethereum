@@ -122,27 +122,40 @@ type blockChain interface {
 }
 
 // TxPoolConfig are the configuration parameters of the transaction pool.
+// 交易池的配置参数
 type TxPoolConfig struct {
+	// 应该默认被认为是本地地址的地址
 	Locals    []common.Address // Addresses that should be treated by default as local
+	// 是否本地交易处理应该被禁止
 	NoLocals  bool             // Whether local transaction handling should be disabled
+	// node重启后依然幸存的本地交易的日记
 	Journal   string           // Journal of local transactions to survive node restarts
+	// 重新产生本地交易日记的时间间隔
 	Rejournal time.Duration    // Time interval to regenerate the local transaction journal
 
+	// 交易要被接受到交易池的最小Gas价格
 	PriceLimit uint64 // Minimum gas price to enforce for acceptance into the pool
 	PriceBump  uint64 // Minimum price bump percentage to replace an already existing transaction (nonce)
 
+	// 保证给每个账户的可执行交易槽的数量
 	AccountSlots uint64 // Number of executable transaction slots guaranteed per account
+	// 所有账户总的可执行交易槽的最大数量
 	GlobalSlots  uint64 // Maximum number of executable transaction slots for all accounts
+	// 每个账户允许的不可执行的交易槽的最大数量
 	AccountQueue uint64 // Maximum number of non-executable transaction slots permitted per account
+	// 所有账户总的不可执行的交易槽的最大数量
 	GlobalQueue  uint64 // Maximum number of non-executable transaction slots for all accounts
 
+	// 不可执行的交易排队的最大时间限制
 	Lifetime time.Duration // Maximum amount of time non-executable transaction are queued
 }
 
 // DefaultTxPoolConfig contains the default configurations for the transaction
 // pool.
+// 包含交易池的默认配置
 var DefaultTxPoolConfig = TxPoolConfig{
 	Journal:   "transactions.rlp",
+	// 重新产生本地交易日记的时间间隔设置为1个小时
 	Rejournal: time.Hour,
 
 	PriceLimit: 1,
@@ -153,6 +166,7 @@ var DefaultTxPoolConfig = TxPoolConfig{
 	AccountQueue: 64,
 	GlobalQueue:  1024,
 
+	// 每笔交易最长排队3小时
 	Lifetime: 3 * time.Hour,
 }
 

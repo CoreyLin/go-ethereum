@@ -55,65 +55,80 @@ const (
 var errServerStopped = errors.New("server stopped")
 
 // Config holds Server options.
+// P2P服务器的配置项
 type Config struct {
 	// This field must be set to a valid secp256k1 private key.
+	// 必须被设置为一个合法的secp256k1私钥
 	PrivateKey *ecdsa.PrivateKey `toml:"-"`
 
 	// MaxPeers is the maximum number of peers that can be
 	// connected. It must be greater than zero.
+	// 能够连接的对等节点的最大数量。必须大于0.
 	MaxPeers int
 
 	// MaxPendingPeers is the maximum number of peers that can be pending in the
 	// handshake phase, counted separately for inbound and outbound connections.
 	// Zero defaults to preset values.
+	// 在握手阶段可以pending的对等节点的最大数量，inbound和outbound连接分别计算。
 	MaxPendingPeers int `toml:",omitempty"`
 
 	// DialRatio controls the ratio of inbound to dialed connections.
 	// Example: a DialRatio of 2 allows 1/2 of connections to be dialed.
 	// Setting DialRatio to zero defaults it to 3.
+	// TODO 这个参数理解不了
 	DialRatio int `toml:",omitempty"`
 
 	// NoDiscovery can be used to disable the peer discovery mechanism.
 	// Disabling is useful for protocol debugging (manual topology).
+	// 用于关闭对等节点发现机制。在协议调试（手工拓扑）的时候有用。
 	NoDiscovery bool
 
 	// DiscoveryV5 specifies whether the new topic-discovery based V5 discovery
 	// protocol should be started or not.
+	// 指定基于主题发现的V5发现协议是否应该被开启
 	DiscoveryV5 bool `toml:",omitempty"`
 
 	// Name sets the node name of this server.
 	// Use common.MakeName to create a name that follows existing conventions.
+	// 设置当前服务器的名称。用common.MakeName可以创建一个符合已有约定的名称。
 	Name string `toml:"-"`
 
 	// BootstrapNodes are used to establish connectivity
 	// with the rest of the network.
+	// 用于和网络剩余节点建立连接
 	BootstrapNodes []*discover.Node
 
 	// BootstrapNodesV5 are used to establish connectivity
 	// with the rest of the network using the V5 discovery
 	// protocol.
+	// 用于和网络剩余节点通过V5发现协议建立连接
 	BootstrapNodesV5 []*discv5.Node `toml:",omitempty"`
 
 	// Static nodes are used as pre-configured connections which are always
 	// maintained and re-connected on disconnects.
+	// 被当做预先配置的连接，一直被维护，连接断开时就重新连接
 	StaticNodes []*discover.Node
 
 	// Trusted nodes are used as pre-configured connections which are always
 	// allowed to connect, even above the peer limit.
+	// 被当做预先配置的连接，总是允许被连接，即使超过了对等节点的数量上限。
 	TrustedNodes []*discover.Node
 
 	// Connectivity can be restricted to certain IP networks.
 	// If this option is set to a non-nil value, only hosts which match one of the
 	// IP networks contained in the list are considered.
+	// 连接可以被限制在特定的IP网段（网络IP+掩码）。如果这个属性不为nil，那么只有被包含在这个list里面的IP网段的IP才可以被连接。
 	NetRestrict *netutil.Netlist `toml:",omitempty"`
 
 	// NodeDatabase is the path to the database containing the previously seen
 	// live nodes in the network.
+	// 包含之前在网络上看见的活的节点的数据库的路径
 	NodeDatabase string `toml:",omitempty"`
 
 	// Protocols should contain the protocols supported
 	// by the server. Matching protocols are launched for
 	// each peer.
+	// 应该包含被这个服务器支持的所有协议。匹配的协议对于每一个对等节点都启动。
 	Protocols []Protocol `toml:"-"`
 
 	// If ListenAddr is set to a non-nil address, the server
@@ -122,22 +137,28 @@ type Config struct {
 	// If the port is zero, the operating system will pick a port. The
 	// ListenAddr field will be updated with the actual address when
 	// the server is started.
+	// 如果被设置为一个非nil的地址，这个服务器会监听接收到的连接。
+	// 如果端口是0，操作系统会挑选一个端口。当服务器启动的时候，ListenAddr属性会被更新为实际的地址。
 	ListenAddr string
 
 	// If set to a non-nil value, the given NAT port mapper
 	// is used to make the listening port available to the
 	// Internet.
+	// 如果被设置为一个非nil的值，那设置的NAT端口映射器被用于让监听端口能够被互联网访问。
 	NAT nat.Interface `toml:",omitempty"`
 
 	// If Dialer is set to a non-nil value, the given Dialer
 	// is used to dial outbound peer connections.
+	// 如果被设置为一个非nil的值，就被用于向外面的对等节点连接拨号
 	Dialer NodeDialer `toml:"-"`
 
 	// If NoDial is true, the server will not dial any peers.
+	// 如果设置为true，就不会向任何对等节点拨号
 	NoDial bool `toml:",omitempty"`
 
 	// If EnableMsgEvents is set then the server will emit PeerEvents
 	// whenever a message is sent to or received from a peer
+	// 如果设置为true，那么当前服务器在向一个节点发送或者接收消息的时候会发出PeerEvents（对等节点事件）
 	EnableMsgEvents bool
 
 	// Logger is a custom logger to use with the p2p.Server.

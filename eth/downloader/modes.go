@@ -19,11 +19,15 @@ package downloader
 import "fmt"
 
 // SyncMode represents the synchronisation mode of the downloader.
+// SyncMode代表下载器的同步模式
 type SyncMode int
 
 const (
+	// 同步整个区块链所有完整区块的历史
 	FullSync  SyncMode = iota // Synchronise the entire blockchain history from full blocks
+	// 快速下载头部，仅仅在区块链头部进行完全同步
 	FastSync                  // Quickly download the headers, full sync only at the chain head
+	// 仅仅下载头部，随后终止
 	LightSync                 // Download only the headers and terminate afterwards
 )
 

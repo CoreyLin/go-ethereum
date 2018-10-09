@@ -15,6 +15,7 @@
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
 // geth is the official command-line client for Ethereum.
+// geth是以太坊官方命令行客户端
 package main
 
 import (
@@ -43,6 +44,7 @@ import (
 )
 
 const (
+	// 客户端标识，用于在网络上做宣传广告
 	clientIdentifier = "geth" // Client identifier to advertise over the network
 )
 
@@ -50,6 +52,7 @@ var (
 	// Git SHA1 commit hash of the release (set via linker flags)
 	gitCommit = ""
 	// The app that holds all commands and flags.
+	//
 	app = utils.NewApp(gitCommit, "the go-ethereum command line interface")
 	// flags that configure the node
 	nodeFlags = []cli.Flag{
@@ -166,6 +169,8 @@ var (
 
 func init() {
 	// Initialize the CLI app and start Geth
+	// 初始化CLI程序并且启动Geth
+	// 如果不指定任何子命令就直接运行geth函数
 	app.Action = geth
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2013-2018 The go-ethereum Authors"
@@ -258,7 +263,9 @@ func main() {
 // geth is the main entry point into the system if no special subcommand is ran.
 // It creates a default node based on the command line arguments and runs it in
 // blocking mode, waiting for it to be shut down.
+// 如果不指定特别的子命令，那么geth函数就是系统的主入口。它基于命令行参数创建了一个默认的节点，并且以blocking模式运行这个节点，等待节点被关闭
 func geth(ctx *cli.Context) error {
+	// 如果除了程序路径之外，还有其他的参数，那么就直接返回error
 	if args := ctx.Args(); len(args) > 0 {
 		return fmt.Errorf("invalid command: %q", args[0])
 	}

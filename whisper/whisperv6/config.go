@@ -17,6 +17,7 @@
 package whisperv6
 
 // Config represents the configuration state of a whisper node.
+// 代表whisper节点的配置状态
 type Config struct {
 	MaxMessageSize                        uint32  `toml:",omitempty"`
 	MinimumAcceptedPOW                    float64 `toml:",omitempty"`
@@ -24,6 +25,7 @@ type Config struct {
 }
 
 // DefaultConfig represents (shocker!) the default configuration.
+// 代表默认配置
 var DefaultConfig = Config{
 	MaxMessageSize:                        DefaultMaxMessageSize,
 	MinimumAcceptedPOW:                    DefaultMinimumPoW,

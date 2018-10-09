@@ -44,6 +44,7 @@ var (
 )
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.
+// 代表任意数据的Keccak256的Hash值，共32字节。
 type Hash [HashLength]byte
 
 // BytesToHash sets b to hash.

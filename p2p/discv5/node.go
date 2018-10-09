@@ -36,14 +36,18 @@ import (
 
 // Node represents a host on the network.
 // The public fields of Node may not be modified.
+// 代表网络上的一台主机。Node的公开属性不可以被改变。
 type Node struct {
 	IP       net.IP // len 4 for IPv4 or 16 for IPv6
+	// UDP,TCP的端口号
 	UDP, TCP uint16 // port numbers
+	// 节点的公钥
 	ID       NodeID // the node's public key
 
 	// Network-related fields are contained in nodeNetGuts.
 	// These fields are not supposed to be used off the
 	// Network.loop goroutine.
+	// nodeNetGuts包含了和网络相关的属性。
 	nodeNetGuts
 }
 

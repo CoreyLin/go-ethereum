@@ -68,6 +68,7 @@ func (hc *httpConn) Close() error {
 }
 
 // HTTPTimeouts represents the configuration params for the HTTP RPC server.
+// 代表HTTP RPC服务器的配置参数
 type HTTPTimeouts struct {
 	// ReadTimeout is the maximum duration for reading the entire
 	// request, including the body.
@@ -76,23 +77,30 @@ type HTTPTimeouts struct {
 	// decisions on each request body's acceptable deadline or
 	// upload rate, most users will prefer to use
 	// ReadHeaderTimeout. It is valid to use them both.
+	// 读取整个请求（包括请求主体）的最大时间。
+	// 由于ReadTimeout不能让Handlers对每个请求体的可接受最后期限或上传速度做决定，大部分用户更倾向于使用ReadHeaderTimeout.
+	// 同时使用ReadHeaderTimeout和ReadTimeout是合法的。
 	ReadTimeout time.Duration
 
 	// WriteTimeout is the maximum duration before timing out
 	// writes of the response. It is reset whenever a new
 	// request's header is read. Like ReadTimeout, it does not
 	// let Handlers make decisions on a per-request basis.
+	// 写response的超时时间。当一个新的请求头部被读取的时候，WriteTimeout被重置。它同样不允许Handlers基于每个请求做决定。
 	WriteTimeout time.Duration
 
 	// IdleTimeout is the maximum amount of time to wait for the
 	// next request when keep-alives are enabled. If IdleTimeout
 	// is zero, the value of ReadTimeout is used. If both are
 	// zero, ReadHeaderTimeout is used.
+	// 当开启keep-alives的时候，等待下一条请求的最大超时时间。如果为零，那么就使用ReadTimeout的值。如果ReadTimeout的值
+	// 也为零，就使用ReadHeaderTimeout的时间。
 	IdleTimeout time.Duration
 }
 
 // DefaultHTTPTimeouts represents the default timeout values used if further
 // configuration is not provided.
+// 如果没有进一步的配置被提供，那么就用这个默认的超时时间的配置
 var DefaultHTTPTimeouts = HTTPTimeouts{
 	ReadTimeout:  30 * time.Second,
 	WriteTimeout: 30 * time.Second,

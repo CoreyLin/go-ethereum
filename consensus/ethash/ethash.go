@@ -384,6 +384,7 @@ func MakeDataset(block uint64, dir string) {
 }
 
 // Mode defines the type and amount of PoW verification an ethash engine makes.
+// 定义了由ethash引擎产生的PoW验证的类型和数量
 type Mode uint
 
 const (
@@ -395,6 +396,7 @@ const (
 )
 
 // Config are the configuration parameters of the ethash.
+// ethash的配置参数
 type Config struct {
 	CacheDir       string
 	CachesInMem    int

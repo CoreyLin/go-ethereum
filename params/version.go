@@ -33,6 +33,7 @@ var Version = func() string {
 }()
 
 // VersionWithMeta holds the textual version string including the metadata.
+// 存储文本类型的版本字符串，并且包含元数据
 var VersionWithMeta = func() string {
 	v := Version
 	if VersionMeta != "" {

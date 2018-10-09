@@ -47,17 +47,21 @@ const (
 // Config represents a small collection of configuration values to fine tune the
 // P2P network layer of a protocol stack. These values can be further extended by
 // all registered services.
+// Config代表一个小的配置值的集合，用于微调协议栈的点对点网络层。这些配置值可以被所有注册的服务进一步扩展
 type Config struct {
 	// Name sets the instance name of the node. It must not contain the / character and is
 	// used in the devp2p node identifier. The instance name of geth is "geth". If no
 	// value is specified, the basename of the current executable is used.
+	// 代表节点的实例名。不能包含/，被用在devp2p节点标识符。geth的实例名是geth。如果值没有被指定，当前可执行文件的basename就是实例名
 	Name string `toml:"-"`
 
 	// UserIdent, if set, is used as an additional component in the devp2p node identifier.
+	// 如果设置了，就在devp2p节点标识符里被作为附加的模块
 	UserIdent string `toml:",omitempty"`
 
 	// Version should be set to the version number of the program. It is used
 	// in the devp2p node identifier.
+	// 应该被设置为程序的版本号。用在devp2p节点标识符里面。
 	Version string `toml:"-"`
 
 	// DataDir is the file system folder the node should use for any data storage
@@ -65,9 +69,12 @@ type Config struct {
 	// registered services, instead those can use utility methods to create/access
 	// databases or flat files. This enables ephemeral nodes which can fully reside
 	// in memory.
+	// 用于该节点存储任何数据的文件系统目录。配置的数据目录不会被直接和注册的服务共享，相反，注册的服务可以使用utility方法来创建
+	// 或者访问数据库或者平面文件。这使得完全存在于内存中的短暂的节点成为可能。
 	DataDir string
 
 	// Configuration of peer-to-peer networking.
+	// 点对点网络的配置
 	P2P p2p.Config
 
 	// KeyStoreDir is the file system folder that contains private keys. The directory can
@@ -77,28 +84,36 @@ type Config struct {
 	// If KeyStoreDir is empty, the default location is the "keystore" subdirectory of
 	// DataDir. If DataDir is unspecified and KeyStoreDir is empty, an ephemeral directory
 	// is created by New and destroyed when the node is stopped.
+	// 用于保存私钥的文件系统目录。可以被指定为相对于当前路径的路径。
+	// 如果为空，那么默认的路径是DataDir下的keystore子文件夹。如果DataDir没有指定，KeyStoreDir也是空，那么一个短暂的文件夹
+	// 被创建，并且在节点停止的时候被删除。
 	KeyStoreDir string `toml:",omitempty"`
 
 	// UseLightweightKDF lowers the memory and CPU requirements of the key store
 	// scrypt KDF at the expense of security.
+	// 以牺牲安全性为代价，降低key store scrypt KDF的内存和CPU需求
 	UseLightweightKDF bool `toml:",omitempty"`
 
 	// NoUSB disables hardware wallet monitoring and connectivity.
+	// 禁止硬件钱包监控和连接
 	NoUSB bool `toml:",omitempty"`
 
 	// IPCPath is the requested location to place the IPC endpoint. If the path is
 	// a simple file name, it is placed inside the data directory (or on the root
 	// pipe path on Windows), whereas if it's a resolvable path name (absolute or
 	// relative), then that specific path is enforced. An empty path disables IPC.
+	// 用于定位IPC endpoint的被请求地址。
 	IPCPath string `toml:",omitempty"`
 
 	// HTTPHost is the host interface on which to start the HTTP RPC server. If this
 	// field is empty, no HTTP API endpoint will be started.
+	// 用于启动HTTP RPC服务器的主机接口。如果为空，那么HTTP API endpoint不会启动
 	HTTPHost string `toml:",omitempty"`
 
 	// HTTPPort is the TCP port number on which to start the HTTP RPC server. The
 	// default zero value is/ valid and will pick a port number randomly (useful
 	// for ephemeral nodes).
+	// 用于启动HTTP RPC服务器的TCP端口号。默认零值是/,会随机挑选一个端口号（对短暂的节点很有用）
 	HTTPPort int `toml:",omitempty"`
 
 	// HTTPCors is the Cross-Origin Resource Sharing header to send to requesting
@@ -118,29 +133,35 @@ type Config struct {
 	// HTTPModules is a list of API modules to expose via the HTTP RPC interface.
 	// If the module list is empty, all RPC API endpoints designated public will be
 	// exposed.
+	// 通过HTTP RPC接口暴露的API模块的列表。如果为空，所有public的RPC API endpoints都会被暴露。
 	HTTPModules []string `toml:",omitempty"`
 
 	// HTTPTimeouts allows for customization of the timeout values used by the HTTP RPC
 	// interface.
+	// 允许自定义HTTP RPC接口的timeout时间
 	HTTPTimeouts rpc.HTTPTimeouts
 
 	// WSHost is the host interface on which to start the websocket RPC server. If
 	// this field is empty, no websocket API endpoint will be started.
+	// 用于启动websocket RPC服务器的主机接口。如果为空，那么不会启动websocket API endpoint。
 	WSHost string `toml:",omitempty"`
 
 	// WSPort is the TCP port number on which to start the websocket RPC server. The
 	// default zero value is/ valid and will pick a port number randomly (useful for
 	// ephemeral nodes).
+	// 用于启动websocket RPC服务器的TCP端口号。默认零值是/,会随机挑选一个端口号（对短暂的节点很有用）
 	WSPort int `toml:",omitempty"`
 
 	// WSOrigins is the list of domain to accept websocket requests from. Please be
 	// aware that the server can only act upon the HTTP request the client sends and
 	// cannot verify the validity of the request header.
+	// 指定可以从哪些domain接收websocket请求。仅对这些domain接收到的请求有动作，不能验证请求头的合法性。
 	WSOrigins []string `toml:",omitempty"`
 
 	// WSModules is a list of API modules to expose via the websocket RPC interface.
 	// If the module list is empty, all RPC API endpoints designated public will be
 	// exposed.
+	// 通过websocket RPC接口暴露的API模块的列表。如果为空，所有public的RPC API endpoints都会被暴露。
 	WSModules []string `toml:",omitempty"`
 
 	// WSExposeAll exposes all API modules via the WebSocket RPC interface rather
@@ -148,9 +169,12 @@ type Config struct {
 	//
 	// *WARNING* Only set this if the node is running in a trusted network, exposing
 	// private APIs to untrusted users is a major security risk.
+	// 通过WebSocket RPC接口暴露所有的API模块，而不仅仅是暴露public的API。
+	// 仅仅在可信任的网络上运行的时候才可以设置为true，把私有API暴露给不可信任的用户是很严重的安全风险。
 	WSExposeAll bool `toml:",omitempty"`
 
 	// Logger is a custom logger to use with the p2p.Server.
+	// 用于点对点服务器的定制logger
 	Logger log.Logger `toml:",omitempty"`
 }
 

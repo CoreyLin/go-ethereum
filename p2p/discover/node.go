@@ -40,9 +40,12 @@ const NodeIDBits = 512
 
 // Node represents a host on the network.
 // The fields of Node may not be modified.
+// 代表网络上的一台主机。Node的属性不可以被改变。
 type Node struct {
 	IP       net.IP // len 4 for IPv4 or 16 for IPv6
+	// UDP,TCP的端口号
 	UDP, TCP uint16 // port numbers
+	// 节点的公钥
 	ID       NodeID // the node's public key
 
 	// This is a cached copy of sha3(ID) which is used for node
@@ -50,9 +53,12 @@ type Node struct {
 	// possible to write tests that need a node at a certain distance.
 	// In those tests, the content of sha will not actually correspond
 	// with ID.
+	// sha3(ID)的缓存副本，用于节点距离计算。如果测试如果用到某个距离的节点，就可以用这个属性。
+	// 在这种测试里，sha的内容不会和ID一致。
 	sha common.Hash
 
 	// Time when the node was added to the table.
+	// 节点被加进表格的时间。
 	addedAt time.Time
 }
 
@@ -223,6 +229,7 @@ func (n *Node) UnmarshalText(text []byte) error {
 
 // NodeID is a unique identifier for each node.
 // The node identifier is a marshaled elliptic curve public key.
+// 每个节点的唯一标识符。是一个marshaled的椭圆曲线公钥。64个字节的数组。
 type NodeID [NodeIDBits / 8]byte
 
 // Bytes returns a byte slice representation of the NodeID

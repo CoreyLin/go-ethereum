@@ -34,8 +34,10 @@ import (
 )
 
 // DefaultConfig contains default settings for use on the Ethereum main net.
+// DefaultConfig包含了用于以太坊主网的默认配置
 var DefaultConfig = Config{
 	SyncMode: downloader.FastSync,
+	// PoW验证模式没有设置，默认是ModeNormal
 	Ethash: ethash.Config{
 		CacheDir:       "ethash",
 		CachesInMem:    2,
@@ -79,18 +81,25 @@ func init() {
 type Config struct {
 	// The genesis block, which is inserted if the database is empty.
 	// If nil, the Ethereum main net block is used.
+	// 如果数据库为空，就插入这个创世区块。如果是nil，就使用以太坊主网区块
 	Genesis *core.Genesis `toml:",omitempty"`
 
 	// Protocol options
+	// 协议可选项
+	// NetworkId用于选择要连接到的对等节点
 	NetworkId uint64 // Network ID to use for selecting peers to connect to
 	SyncMode  downloader.SyncMode
 	NoPruning bool
 
 	// Light client options
+	// 轻客户端可选项
+	// 允许服务LES请求的时间的最大百分比
 	LightServ  int `toml:",omitempty"` // Maximum percentage of time allowed for serving LES requests
+	// LES客户端对等节点的最大数量
 	LightPeers int `toml:",omitempty"` // Maximum number of LES client peers
 
 	// Database options
+	// 数据库可选项
 	SkipBcVersionCheck bool `toml:"-"`
 	DatabaseHandles    int  `toml:"-"`
 	DatabaseCache      int
@@ -98,6 +107,7 @@ type Config struct {
 	TrieTimeout        time.Duration
 
 	// Mining-related options
+	// 挖矿相关的可选项
 	Etherbase      common.Address `toml:",omitempty"`
 	MinerNotify    []string       `toml:",omitempty"`
 	MinerExtraData []byte         `toml:",omitempty"`
@@ -108,15 +118,19 @@ type Config struct {
 	MinerNoverify  bool
 
 	// Ethash options
+	// Ethash POW算法可选项
 	Ethash ethash.Config
 
 	// Transaction pool options
+	// 交易池可选项
 	TxPool core.TxPoolConfig
 
 	// Gas Price Oracle options
+	// Gas价格Oracle可选项
 	GPO gasprice.Config
 
 	// Enables tracking of SHA3 preimages in the VM
+	// 在VM中开启SHA3原像追踪
 	EnablePreimageRecording bool
 
 	// Miscellaneous options

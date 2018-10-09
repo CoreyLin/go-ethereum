@@ -15,6 +15,7 @@
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
 
 // Package utils contains internal helper functions for go-ethereum commands.
+// utils包包含对于go-ethereum命令的内部帮助函数
 package utils
 
 import (
@@ -92,12 +93,17 @@ GLOBAL OPTIONS:
 
 // NewApp creates an app with sane defaults.
 func NewApp(gitCommit, usage string) *cli.App {
+	// 用合理的Name, Usage, Version，Action的默认值创建一个新的cli程序
 	app := cli.NewApp()
+	// 注意：os.Args[0]代表的是程序的绝对路径，那么filepath.Base(os.Args[0])代表的是程序名
 	app.Name = filepath.Base(os.Args[0])
+	// 注意：Use App.Authors, this is deprecated
 	app.Author = ""
 	//app.Authors = nil
 	app.Email = ""
+	// 获取Version，比如1.8.16-unstable
 	app.Version = params.VersionWithMeta
+	// 如果gitCommit的长度大于等于8，那么把gitCommit的前8个字符追加到Version的后面
 	if len(gitCommit) >= 8 {
 		app.Version += "-" + gitCommit[:8]
 	}
@@ -117,6 +123,7 @@ var (
 	DataDirFlag = DirectoryFlag{
 		Name:  "datadir",
 		Usage: "Data directory for the databases and keystore",
+		// 获取了数据默认的文件夹路径，也就是说无论如何都有一个默认路径
 		Value: DirectoryString{node.DefaultDataDir()},
 	}
 	KeyStoreDirFlag = DirectoryFlag{

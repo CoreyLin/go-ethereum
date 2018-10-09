@@ -19,6 +19,7 @@ package dashboard
 import "time"
 
 // DefaultConfig contains default settings for the dashboard.
+// 包含仪表盘的默认设置
 var DefaultConfig = Config{
 	Host:    "localhost",
 	Port:    8080,
@@ -26,16 +27,20 @@ var DefaultConfig = Config{
 }
 
 // Config contains the configuration parameters of the dashboard.
+// 包含仪表盘的配置参数
 type Config struct {
 	// Host is the host interface on which to start the dashboard server. If this
 	// field is empty, no dashboard will be started.
+	// 用于启动仪表盘服务器的主机接口。如果为空，仪表盘不会被启动。
 	Host string `toml:",omitempty"`
 
 	// Port is the TCP port number on which to start the dashboard server. The
 	// default zero value is/ valid and will pick a port number randomly (useful
 	// for ephemeral nodes).
+	// 用于启动仪表盘服务器的TCP端口号。默认零值是/，是合法的，会随机选择一个端口号（对于短暂的节点很有用）
 	Port int `toml:",omitempty"`
 
 	// Refresh is the refresh rate of the data updates, the chartEntry will be collected this often.
+	// 数据更新的刷新时间和频率，chartEntry会被经常收集。
 	Refresh time.Duration `toml:",omitempty"`
 }

@@ -49,6 +49,7 @@ const (
 
 // NodeDialer is used to connect to nodes in the network, typically by using
 // an underlying net.Dialer but also using net.Pipe in tests
+// 用于连接到网络中的节点，尤其是利用底层的net.Dialer，在测试中也可以用net.Pipe
 type NodeDialer interface {
 	Dial(*discover.Node) (net.Conn, error)
 }
