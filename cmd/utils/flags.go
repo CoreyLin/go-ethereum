@@ -639,22 +639,31 @@ func MakeDataDir(ctx *cli.Context) string {
 // setNodeKey creates a node key from set command line flags, either loading it
 // from a file or as a specified hex value. If neither flags were provided, this
 // method returns nil and an emphemeral key is to be generated.
+// 从命令行输入的flag（nodekeyhex或者nodekey）创建一个节点私钥，既可以从一个私钥文件加载，也可以从一个十六进制值转换而来。
+// 如果没有输入相关的flag，那么会生成一个暂时的私钥。
 func setNodeKey(ctx *cli.Context, cfg *p2p.Config) {
 	var (
+		// hex代表nodekeyhex flag，节点的私钥（16进制表示）
 		hex  = ctx.GlobalString(NodeKeyHexFlag.Name)
+		// file代表nodekey flag，节点的私钥文件
 		file = ctx.GlobalString(NodeKeyFileFlag.Name)
 		key  *ecdsa.PrivateKey
 		err  error
 	)
 	switch {
+	// 如果命令行同时输入了nodekeyhex和nodekey两个flag，那么打印消息到标准错误输出，并且退出程序
+	// %q	a double-quoted string safely escaped with Go syntax
 	case file != "" && hex != "":
 		Fatalf("Options %q and %q are mutually exclusive", NodeKeyFileFlag.Name, NodeKeyHexFlag.Name)
 	case file != "":
+		// 从给定的节点私钥文件里加载一个secp256k1私钥
 		if key, err = crypto.LoadECDSA(file); err != nil {
+			// 加载私钥失败就打印消息到标准错误输出并退出
 			Fatalf("Option %q: %v", NodeKeyFileFlag.Name, err)
 		}
 		cfg.PrivateKey = key
 	case hex != "":
+		// 把十六进制的私钥字符串转换为*ecdsa.PrivateKey类型的私钥
 		if key, err = crypto.HexToECDSA(hex); err != nil {
 			Fatalf("Option %q: %v", NodeKeyHexFlag.Name, err)
 		}
@@ -663,35 +672,52 @@ func setNodeKey(ctx *cli.Context, cfg *p2p.Config) {
 }
 
 // setNodeUserIdent creates the user identifier from CLI flags.
+// 从命令行flag创建自定义用户标识符
 func setNodeUserIdent(ctx *cli.Context, cfg *node.Config) {
 	if identity := ctx.GlobalString(IdentityFlag.Name); len(identity) > 0 {
+		// 如果identity flag被设置了，并且值不是空字符串，那就把值赋给cfg.UserIdent
 		cfg.UserIdent = identity
 	}
 }
 
 // setBootstrapNodes creates a list of bootstrap nodes from the command line
 // flags, reverting to pre-configured ones if none have been specified.
+// 根据命令行flag创建一个引导节点的列表，如果没有输入任何相关flag，就使用预配置的flag
 func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
+	// 获取默认的不同国家或地区的引导节点
 	urls := params.MainnetBootnodes
 	switch {
 	case ctx.GlobalIsSet(BootnodesFlag.Name) || ctx.GlobalIsSet(BootnodesV4Flag.Name):
+		// "bootnodesv4" flag的优先级比"bootnodes" flag的优先级高。
 		if ctx.GlobalIsSet(BootnodesV4Flag.Name) {
 			urls = strings.Split(ctx.GlobalString(BootnodesV4Flag.Name), ",")
 		} else {
 			urls = strings.Split(ctx.GlobalString(BootnodesFlag.Name), ",")
 		}
 	case ctx.GlobalBool(TestnetFlag.Name):
+		// 如果"testnet" flag被设置为true，意味着Ropsten测试网络打开，就把Ropsten测试网络的默认引导节点赋值给urls
+		// 注：Ropsten使用的是PoW共识机制
 		urls = params.TestnetBootnodes
 	case ctx.GlobalBool(RinkebyFlag.Name):
+		// 如果"rinkeby" flag被设置为true，意味着Rinkeby测试网络打开，就把Rinkeby测试网络的默认引导节点赋值给urls
+		// 注：Rinkeby使用的是PoA共识机制
 		urls = params.RinkebyBootnodes
 	case cfg.BootstrapNodes != nil:
+		// 如果上面几种flag都没有设置，并且cfg.BootstrapNodes不为nil，已经有值了，就直接返回
 		return // already set, don't apply defaults.
 	}
 
+	// 创建一个切片，长度为0，容量为以上urls的长度
+	// 能走到这一步，有几种可能：
+	// 1.flag bootnodesv4，bootnodes，testnet，rinkeby的其中一个被设置了，不管cfg.BootstrapNodes是否为nil，都走到这一步。
+	//		如果cfg.BootstrapNodes的值不为nil，那么就会接下来的重新初始化就会把之前的值冲掉。疑问：以前的值被冲掉是否有问题？
+	// 2.flag bootnodesv4，bootnodes，testnet，rinkeby都没有被设置，并且cfg.BootstrapNodes的值为nil，才会走到这一步
 	cfg.BootstrapNodes = make([]*discover.Node, 0, len(urls))
 	for _, url := range urls {
+		// 解析节点标识符，即Node URL
 		node, err := discover.ParseNode(url)
 		if err != nil {
+			// 打印CRIT级别的日志，并且退出程序，退出码为1
 			log.Crit("Bootstrap URL invalid", "enode", url, "err", err)
 		}
 		cfg.BootstrapNodes = append(cfg.BootstrapNodes, node)
@@ -700,10 +726,12 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 
 // setBootstrapNodesV5 creates a list of bootstrap nodes from the command line
 // flags, reverting to pre-configured ones if none have been specified.
+// 根据命令行flag创建一个引导节点的列表，如果没有输入任何相关flag，就使用预配置的flag
 func setBootstrapNodesV5(ctx *cli.Context, cfg *p2p.Config) {
 	urls := params.DiscoveryV5Bootnodes
 	switch {
 	case ctx.GlobalIsSet(BootnodesFlag.Name) || ctx.GlobalIsSet(BootnodesV5Flag.Name):
+		// flag bootnodes或者bootnodesv5
 		if ctx.GlobalIsSet(BootnodesV5Flag.Name) {
 			urls = strings.Split(ctx.GlobalString(BootnodesV5Flag.Name), ",")
 		} else {
@@ -728,14 +756,18 @@ func setBootstrapNodesV5(ctx *cli.Context, cfg *p2p.Config) {
 
 // setListenAddress creates a TCP listening address string from set command
 // line flags.
+// 从命令行flag创建一个TCP监听端口
 func setListenAddress(ctx *cli.Context, cfg *p2p.Config) {
 	if ctx.GlobalIsSet(ListenPortFlag.Name) {
+		// 如果port flag被输入了，就在前面加一个冒号，并且返回。如果没有输入port flag，默认是30303
 		cfg.ListenAddr = fmt.Sprintf(":%d", ctx.GlobalInt(ListenPortFlag.Name))
 	}
 }
 
 // setNAT creates a port mapper from command line flags.
+// 从命令行flag创建一个端口映射器
 func setNAT(ctx *cli.Context, cfg *p2p.Config) {
+	// 检查nat flag是否被命令行输入，如果没有输入默认值是“any”，any就代表使用第一个自动检测到的机制
 	if ctx.GlobalIsSet(NATFlag.Name) {
 		natif, err := nat.Parse(ctx.GlobalString(NATFlag.Name))
 		if err != nil {
@@ -747,6 +779,7 @@ func setNAT(ctx *cli.Context, cfg *p2p.Config) {
 
 // splitAndTrim splits input separated by a comma
 // and trims excessive white space from the substrings.
+// 分隔用逗号分开的输入，并且删掉多余的空格
 func splitAndTrim(input string) []string {
 	result := strings.Split(input, ",")
 	for i, r := range result {
@@ -757,52 +790,67 @@ func splitAndTrim(input string) []string {
 
 // setHTTP creates the HTTP RPC listener interface string from the set
 // command line flags, returning empty if the HTTP endpoint is disabled.
+// 从命令行flag创建HTTP RPC监听接口
 func setHTTP(ctx *cli.Context, cfg *node.Config) {
 	if ctx.GlobalBool(RPCEnabledFlag.Name) && cfg.HTTPHost == "" {
+		// 如果rpc flag的值为true，并且cfg.HTTPHost为空，则设置为127.0.0.1
 		cfg.HTTPHost = "127.0.0.1"
 		if ctx.GlobalIsSet(RPCListenAddrFlag.Name) {
+			// 如果rpcaddr flag被设置了，那么把它的值赋给cfg.HTTPHost
 			cfg.HTTPHost = ctx.GlobalString(RPCListenAddrFlag.Name)
 		}
 	}
 
 	if ctx.GlobalIsSet(RPCPortFlag.Name) {
+		// 如果rpcport flag的值被设置了，那么把它的值赋给cfg.HTTPPort
 		cfg.HTTPPort = ctx.GlobalInt(RPCPortFlag.Name)
 	}
 	if ctx.GlobalIsSet(RPCCORSDomainFlag.Name) {
+		// 如果rpccorsdomain的值被设置了，那么把它的值按逗号分割为切片后赋给cfg.HTTPCors
 		cfg.HTTPCors = splitAndTrim(ctx.GlobalString(RPCCORSDomainFlag.Name))
 	}
 	if ctx.GlobalIsSet(RPCApiFlag.Name) {
+		// 如果rpcapi的值被设置了，那么把它的值按逗号分割为切片后赋给cfg.HTTPModules
 		cfg.HTTPModules = splitAndTrim(ctx.GlobalString(RPCApiFlag.Name))
 	}
 	if ctx.GlobalIsSet(RPCVirtualHostsFlag.Name) {
+		// 如果rpcvhosts的值被设置了，那么把它的值按逗号分割为切片后赋给cfg.HTTPVirtualHosts
 		cfg.HTTPVirtualHosts = splitAndTrim(ctx.GlobalString(RPCVirtualHostsFlag.Name))
 	}
 }
 
 // setWS creates the WebSocket RPC listener interface string from the set
 // command line flags, returning empty if the HTTP endpoint is disabled.
+// 从命令行flag创建WebSocket RPC监听接口
 func setWS(ctx *cli.Context, cfg *node.Config) {
 	if ctx.GlobalBool(WSEnabledFlag.Name) && cfg.WSHost == "" {
+		// 如果ws flag被设置了，并且cfg.WSHost为空，那么把它的值设置为127.0.0.1
 		cfg.WSHost = "127.0.0.1"
 		if ctx.GlobalIsSet(WSListenAddrFlag.Name) {
+			// 如果wsaddr flag被设置了，那么把它的值赋给cfg.WSHost
 			cfg.WSHost = ctx.GlobalString(WSListenAddrFlag.Name)
 		}
 	}
 
 	if ctx.GlobalIsSet(WSPortFlag.Name) {
+		// 如果wsport flag被设置了，把它的值赋给cfg.WSPort
 		cfg.WSPort = ctx.GlobalInt(WSPortFlag.Name)
 	}
 	if ctx.GlobalIsSet(WSAllowedOriginsFlag.Name) {
+		// 如果wsorigins flag被设置了，把它的值用逗号分割成切片赋给cfg.WSOrigins
 		cfg.WSOrigins = splitAndTrim(ctx.GlobalString(WSAllowedOriginsFlag.Name))
 	}
 	if ctx.GlobalIsSet(WSApiFlag.Name) {
+		// 如果wsapi flag被设置了，把它的值用逗号分割成切片赋给cfg.WSModules
 		cfg.WSModules = splitAndTrim(ctx.GlobalString(WSApiFlag.Name))
 	}
 }
 
 // setIPC creates an IPC path configuration from the set command line flags,
 // returning an empty string if IPC was explicitly disabled, or the set path.
+// 从命令行flag创建一个IPC路径配置，如果IPC被显式禁用，那返回空字符串，否则返回用户设置的值
 func setIPC(ctx *cli.Context, cfg *node.Config) {
+	// 确保ipcdisable和ipcpath只有其中之一被设置了
 	checkExclusive(ctx, IPCDisabledFlag, IPCPathFlag)
 	switch {
 	case ctx.GlobalBool(IPCDisabledFlag.Name):
@@ -895,34 +943,49 @@ func MakePasswordList(ctx *cli.Context) []string {
 }
 
 func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
+	// 设置节点的私钥
 	setNodeKey(ctx, cfg)
+	// 从命令行flag创建一个端口映射器
 	setNAT(ctx, cfg)
+	// 从命令行flag创建一个TCP监听端口
 	setListenAddress(ctx, cfg)
+	// 从命令行flag设置引导节点
 	setBootstrapNodes(ctx, cfg)
+	// 从命令行flag设置v5的引导节点
 	setBootstrapNodesV5(ctx, cfg)
 
+	// 如果syncmode flag的值是light，那么说明是轻客户端。默认不是轻客户端，而是FastSync。
 	lightClient := ctx.GlobalString(SyncModeFlag.Name) == "light"
+	// 如果lightserv flag的值不等于0，那么说明是轻服务器。默认值是0，不是轻服务器。
 	lightServer := ctx.GlobalInt(LightServFlag.Name) != 0
+	// 轻客户端对等节点的最大数量，默认是100
 	lightPeers := ctx.GlobalInt(LightPeersFlag.Name)
 
 	if ctx.GlobalIsSet(MaxPeersFlag.Name) {
 		cfg.MaxPeers = ctx.GlobalInt(MaxPeersFlag.Name)
 		if lightServer && !ctx.GlobalIsSet(LightPeersFlag.Name) {
+			// 如果是轻服务器，设置了maxpeers flag，但是没有设置lightpeers flag，那么就对cfg.MaxPeers加上默认的lightPeers值100
 			cfg.MaxPeers += lightPeers
 		}
 	} else {
 		if lightServer {
+			// 如果是轻服务器，没有设置maxpeers flag，那么就对cfg.MaxPeers（默认值25）加上lightPeers的值
 			cfg.MaxPeers += lightPeers
 		}
 		if lightClient && ctx.GlobalIsSet(LightPeersFlag.Name) && cfg.MaxPeers < lightPeers {
+			// 如果是轻客户端，没有设置maxpeers flag，设置了lightpeers flag，并且MaxPeers小于lightPeers，那么把lightPeers的值赋给
+			// MaxPeers，即二者相等
 			cfg.MaxPeers = lightPeers
 		}
 	}
 	if !(lightClient || lightServer) {
+		// 如果既不是轻客户端，也不是轻服务器，就把lightPeers设置为0
 		lightPeers = 0
 	}
+	// ethPeers代表非轻客户端对等节点
 	ethPeers := cfg.MaxPeers - lightPeers
 	if lightClient {
+		// 如果是轻客户端，就把非轻客户端对等节点的数量设置为0
 		ethPeers = 0
 	}
 	log.Info("Maximum peer count", "ETH", ethPeers, "LES", lightPeers, "total", cfg.MaxPeers)
@@ -931,6 +994,7 @@ func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
 		cfg.MaxPendingPeers = ctx.GlobalInt(MaxPendingPeersFlag.Name)
 	}
 	if ctx.GlobalIsSet(NoDiscoverFlag.Name) || lightClient {
+		// 如果nodiscover flag被设置了，或者节点是轻客户端，那么就关闭对等节点发现机制
 		cfg.NoDiscovery = true
 	}
 
@@ -939,12 +1003,16 @@ func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
 	// --v5disc overrides --nodiscover, in which case the later only disables v4 discovery
 	forceV5Discovery := (lightClient || lightServer) && !ctx.GlobalBool(NoDiscoverFlag.Name)
 	if ctx.GlobalIsSet(DiscoveryV5Flag.Name) {
+		// 如果v5disc flag被设置，那么DiscoveryV5的值就等于v5disc flag的值
 		cfg.DiscoveryV5 = ctx.GlobalBool(DiscoveryV5Flag.Name)
 	} else if forceV5Discovery {
+		// 如果v5disc flag没有被设置，并且是轻客户端或者轻服务器，并且nodiscover flag没有被设置或者值为false，那么把DiscoveryV5设置为true
+		// 也就是开启v5对等节点发现
 		cfg.DiscoveryV5 = true
 	}
 
 	if netrestrict := ctx.GlobalString(NetrestrictFlag.Name); netrestrict != "" {
+		// 如果netrestrict flag的值不为空，就从netrestrict flag的值解析出网段
 		list, err := netutil.ParseNetlist(netrestrict)
 		if err != nil {
 			Fatalf("Option %q: %v", NetrestrictFlag.Name, err)
@@ -954,6 +1022,7 @@ func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
 
 	if ctx.GlobalBool(DeveloperFlag.Name) {
 		// --dev mode can't use p2p networking.
+		// dev模式被开启的设置如下，不能使用P2P网络
 		cfg.MaxPeers = 0
 		cfg.ListenAddr = ":0"
 		cfg.NoDiscovery = true
@@ -962,11 +1031,17 @@ func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
 }
 
 // SetNodeConfig applies node-related command line flags to the config.
+// 把和节点相关的命令行flag应用到配置
 func SetNodeConfig(ctx *cli.Context, cfg *node.Config) {
+	// 把P2P网络相关的flag应用到配置
 	SetP2PConfig(ctx, &cfg.P2P)
+	// 把IPC相关的flag应用到配置
 	setIPC(ctx, cfg)
+	// 把HTTP相关的flag应用到配置
 	setHTTP(ctx, cfg)
+	// 把websocket相关的flag应用到配置
 	setWS(ctx, cfg)
+	// 把用户标识符相关的flag应用到配置
 	setNodeUserIdent(ctx, cfg)
 
 	switch {
@@ -981,12 +1056,15 @@ func SetNodeConfig(ctx *cli.Context, cfg *node.Config) {
 	}
 
 	if ctx.GlobalIsSet(KeyStoreDirFlag.Name) {
+		// 如果keystore flag被设置了，就把它的值赋给cfg.KeyStoreDir
 		cfg.KeyStoreDir = ctx.GlobalString(KeyStoreDirFlag.Name)
 	}
 	if ctx.GlobalIsSet(LightKDFFlag.Name) {
+		// 如果lightkdf flag被设置了，就把它的值赋给cfg.UseLightweightKDF
 		cfg.UseLightweightKDF = ctx.GlobalBool(LightKDFFlag.Name)
 	}
 	if ctx.GlobalIsSet(NoUSBFlag.Name) {
+		// 如果nousb flag被设置了，就把它的值赋给cfg.NoUSB
 		cfg.NoUSB = ctx.GlobalBool(NoUSBFlag.Name)
 	}
 }
@@ -1067,6 +1145,7 @@ func setEthash(ctx *cli.Context, cfg *eth.Config) {
 // checkExclusive verifies that only a single instance of the provided flags was
 // set by the user. Each flag might optionally be followed by a string type to
 // specialize it further.
+// 验证参数里面的多个flag其中只有一个被用户设置了，如果不止一个被设置，就退出程序。
 func checkExclusive(ctx *cli.Context, args ...interface{}) {
 	set := make([]string, 0, 1)
 	for i := 0; i < len(args); i++ {

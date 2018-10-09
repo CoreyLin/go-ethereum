@@ -64,6 +64,7 @@ type Interface interface {
 //     "upnp"               uses the Universal Plug and Play protocol
 //     "pmp"                uses NAT-PMP with an auto-detected gateway address
 //     "pmp:192.168.0.1"    uses NAT-PMP with the given gateway address
+// 解析一个NAT接口描述。NAT机制名字大小写不敏感。
 func Parse(spec string) (Interface, error) {
 	var (
 		parts = strings.SplitN(spec, ":", 2)

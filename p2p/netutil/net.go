@@ -66,10 +66,12 @@ func init() {
 }
 
 // Netlist is a list of IP networks.
+// IP网段的切片，包含多个网段，一个IPNet包含网络地址和掩码
 type Netlist []net.IPNet
 
 // ParseNetlist parses a comma-separated list of CIDR masks.
 // Whitespace and extra commas are ignored.
+// 解析由逗号分隔的CIDR masks列表。空格和多余的空格被忽略。无类别域间路由（Classless Inter-Domain Routing、CIDR）
 func ParseNetlist(s string) (*Netlist, error) {
 	ws := strings.NewReplacer(" ", "", "\n", "", "\t", "")
 	masks := strings.Split(ws.Replace(s), ",")

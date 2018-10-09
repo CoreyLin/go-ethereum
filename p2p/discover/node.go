@@ -146,6 +146,17 @@ var incompleteNodeURL = regexp.MustCompile("(?i)^(?:enode://)?([0-9a-f]+)$")
 // and UDP discovery port 30301.
 //
 //    enode://<hex node id>@10.3.58.6:30303?discport=30301
+// 解析一个节点标识符。
+// 节点标识符有两种基本形式：
+//	- 非完全节点，只有公钥（节点ID）
+//	- 完全节点，包含公钥和IP，端口信息
+// 对于非完全节点，标识符必须是以下两种其中一种：
+//	enode://<hex node id>
+//	<hex node id>
+// 对于完全节点，节点ID被编码在URL的用户名部分，和主机信息用@符号分开。主机名只能以IP的形式指定，不允许DNS域名。
+// 主机名区域的端口就是TCP监听端口。如果TCP和UDP（发现）的端口不相同，那么用查询参数"discport"来指定UDP端口。
+// 以下这个例子中，节点URL描述了IP地址为10.3.58.6，TCP监听端口为30303，UDP发现端口为30301的节点。
+//	enode://<hex node id>@10.3.58.6:30303?discport=30301
 func ParseNode(rawurl string) (*Node, error) {
 	if m := incompleteNodeURL.FindStringSubmatch(rawurl); m != nil {
 		id, err := HexID(m[1])

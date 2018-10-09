@@ -109,7 +109,9 @@ func loadConfig(file string, cfg *gethConfig) error {
 	// 设置了一些属性的值了，个人认为如果TOML配置文件里定义的键和gethConfig实例有重复，那么TOML配置文件的应该会覆盖掉gethConfig实例里的值。
 	err = tomlSettings.NewDecoder(bufio.NewReader(f)).Decode(cfg)
 	// Add file name to errors that have a line number.
+	// 此处语法参考类型断言：https://golang.org/ref/spec#Type_assertions
 	if _, ok := err.(*toml.LineError); ok {
+		// 如果err是LineError类型的，那么就重新实例化一个error，把配置文件路径加上
 		err = errors.New(file + ", " + err.Error())
 	}
 	return err
@@ -143,11 +145,14 @@ func makeConfigNode(ctx *cli.Context) (*node.Node, gethConfig) {
 	// 先找命令行参数--config对应的值，也就是配置文件的路径，如果不为空，就加载配置文件
 	if file := ctx.GlobalString(configFileFlag.Name); file != "" {
 		if err := loadConfig(file, &cfg); err != nil {
+			// 打印错误到标准错误输出并且退出程序。
+			// %v的语法参考：https://golang.org/pkg/fmt/
 			utils.Fatalf("%v", err)
 		}
 	}
 
 	// Apply flags.
+	// 把命令行输入的flag应用到程序的配置中去
 	utils.SetNodeConfig(ctx, &cfg.Node)
 	stack, err := node.New(&cfg.Node)
 	if err != nil {

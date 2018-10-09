@@ -28,9 +28,11 @@ import (
 )
 
 const (
+	// HTTP RPC服务器默认主机接口
 	DefaultHTTPHost = "localhost" // Default host interface for the HTTP RPC server
 	// HTTP RPC服务器默认端口
 	DefaultHTTPPort = 8545        // Default TCP port for the HTTP RPC server
+	// websocket RPC服务器默认主机接口
 	DefaultWSHost   = "localhost" // Default host interface for the websocket RPC server
 	// websocket RPC服务器默认端口
 	DefaultWSPort   = 8546        // Default TCP port for the websocket RPC server
