@@ -56,15 +56,23 @@ const KeyStoreScheme = "keystore"
 const walletRefreshCycle = 3 * time.Second
 
 // KeyStore manages a key storage directory on disk.
+// 管理key在硬盘上的存储目录
 type KeyStore struct {
+	// 存储后端，可能是明文或密文
 	storage  keyStore                     // Storage backend, might be cleartext or encrypted
+	// 账户的内存缓存
 	cache    *accountCache                // In-memory account cache over the filesystem storage
+	// 从缓存接收变化通知的channel
 	changes  chan struct{}                // Channel receiving change notifications from the cache
+	// 当前未锁定的账户（解密的私钥）
 	unlocked map[common.Address]*unlocked // Currently unlocked account (decrypted private keys)
 
 	wallets     []accounts.Wallet       // Wallet wrappers around the individual key files
+	// 用于通知钱包的创建和移除
 	updateFeed  event.Feed              // Event feed to notify wallet additions/removals
+	// 追踪当前存活的监听器
 	updateScope event.SubscriptionScope // Subscription scope tracking current live listeners
+	// 是否通知循环正在运行
 	updating    bool                    // Whether the event notification loop is running
 
 	mu sync.RWMutex
@@ -94,10 +102,12 @@ func NewPlaintextKeyStore(keydir string) *KeyStore {
 
 func (ks *KeyStore) init(keydir string) {
 	// Lock the mutex since the account cache might call back with events
+	// 锁定互斥对象，因为账户缓存有可能会被事件回调
 	ks.mu.Lock()
 	defer ks.mu.Unlock()
 
 	// Initialize the set of unlocked keys and the account cache
+	// 初始化没有被锁定的私钥以及账户缓存
 	ks.unlocked = make(map[common.Address]*unlocked)
 	ks.cache, ks.changes = newAccountCache(keydir)
 

@@ -212,6 +212,8 @@ func (s *resubscribeSub) backoffWait() bool {
 // larger program.
 //
 // The zero value is ready to use.
+// 提供了一次性取消多个订阅的设施
+// 对于处理多个订阅的代码，一个scope就能被用来方便地取消所有订阅，仅仅需要一次调用。例子演示了在更大系统中的典型使用。
 type SubscriptionScope struct {
 	mu     sync.Mutex
 	subs   map[*scopeSub]struct{}

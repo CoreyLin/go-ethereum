@@ -35,6 +35,7 @@ type Account struct {
 
 // Wallet represents a software or hardware wallet that might contain one or more
 // accounts (derived from the same seed).
+// 表示一个软件或者硬件钱包，可能包含一个或多个账户（来源于同一个种子）
 type Wallet interface {
 	// URL retrieves the canonical path under which this wallet is reachable. It is
 	// user by upper layers to define a sorting order over all wallets from multiple
@@ -130,6 +131,7 @@ type Wallet interface {
 
 // Backend is a "wallet provider" that may contain a batch of accounts they can
 // sign transactions with and upon request, do so.
+// 是一个“钱包提供者”，可以包含一批账户，这些账户能够根据请求签署交易
 type Backend interface {
 	// Wallets retrieves the list of wallets the backend is currently aware of.
 	//
@@ -141,10 +143,15 @@ type Backend interface {
 	// URL assigned by the backend. Since wallets (especially hardware) may come and
 	// go, the same wallet might appear at a different positions in the list during
 	// subsequent retrievals.
+	// 获取当前backend知道的钱包的列表。
+	// 返回的钱包默认没有打开。对于软件钱包这意味着没有种子被解密，对于硬件钱包意味着没有实际的连接被建立。
+	// 返回的钱包list会被按照由backend分配的URL的字母顺序排序。由于钱包（尤其是硬件钱包）可能来了又走，在后续
+	// 的获取中同样的钱包可能会出现在列表里的不同位置。
 	Wallets() []Wallet
 
 	// Subscribe creates an async subscription to receive notifications when the
 	// backend detects the arrival or departure of a wallet.
+	// 创建了一个异步订阅，用于在backend检测到一个钱包的到来和离开的时候接收通知
 	Subscribe(sink chan<- WalletEvent) event.Subscription
 }
 

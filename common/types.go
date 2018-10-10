@@ -35,6 +35,7 @@ const (
 	// HashLength is the expected length of the hash
 	HashLength = 32
 	// AddressLength is the expected length of the address
+	// 以太坊地址的期望长度为20
 	AddressLength = 20
 )
 
@@ -158,6 +159,7 @@ func (h UnprefixedHash) MarshalText() ([]byte, error) {
 /////////// Address
 
 // Address represents the 20 byte address of an Ethereum account.
+// 代表一个以太坊账户的20字节长度的地址
 type Address [AddressLength]byte
 
 // BytesToAddress returns Address with value b.

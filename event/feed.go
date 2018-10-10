@@ -32,6 +32,10 @@ var errBadChannel = errors.New("event: Subscribe argument does not have sendable
 // match.
 //
 // The zero value is ready to use.
+// 实现了一对多的订阅，事件的载体是一个channel（通道）
+// 发往Feed的值被同时分发到所有的被订阅的channel
+// Feed仅仅能够被用于一种数据类型。这种数据类型是在第一次发送或者订阅操作发生时确定的。后续的调用如果类型不匹配就会panic
+// 零值准备好使用
 type Feed struct {
 	once      sync.Once        // ensures that init only runs once
 	sendLock  chan struct{}    // sendLock has a one-element buffer and is empty when held.It protects sendCases.

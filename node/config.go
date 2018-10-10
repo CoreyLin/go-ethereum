@@ -402,6 +402,7 @@ func (c *Config) parsePersistentNodes(path string) []*discover.Node {
 }
 
 // AccountConfig determines the settings for scrypt and keydirectory
+// 确定Scrypt加密算法的设置，以及保存私钥的文件夹的绝对路径
 func (c *Config) AccountConfig() (int, int, string, error) {
 	scryptN := keystore.StandardScryptN
 	scryptP := keystore.StandardScryptP
@@ -416,31 +417,40 @@ func (c *Config) AccountConfig() (int, int, string, error) {
 	)
 	switch {
 	case filepath.IsAbs(c.KeyStoreDir):
+		// 如果KeyStoreDir是绝对路径
 		keydir = c.KeyStoreDir
 	case c.DataDir != "":
 		if c.KeyStoreDir == "" {
+			// 如果DataDir不为空，并且KeyStoreDir为空，那么keydir路径就为DataDir加上“keystore”
 			keydir = filepath.Join(c.DataDir, datadirDefaultKeyStore)
 		} else {
+			// 如果DataDir不为空，并且KeyStoreDir不为空，那么keydir路径就为KeyStoreDir所代表的绝对路径
 			keydir, err = filepath.Abs(c.KeyStoreDir)
 		}
 	case c.KeyStoreDir != "":
+		// 如果DataDir为空，并且KeyStoreDir不为空，那么keydir路径就为KeyStoreDir所代表的绝对路径
 		keydir, err = filepath.Abs(c.KeyStoreDir)
 	}
+	// 还有一种情况：如果DataDir为空，并且KeyStoreDir也为空，那么keydir为空字符串, err为nil
 	return scryptN, scryptP, keydir, err
 }
 
 func makeAccountManager(conf *Config) (*accounts.Manager, string, error) {
+	// 获取Scrypt加密算法的设置，以及保存私钥的文件夹的绝对路径
 	scryptN, scryptP, keydir, err := conf.AccountConfig()
 	var ephemeral string
 	if keydir == "" {
 		// There is no datadir.
+		// keydir为空说明datadir没有设置，那么就在操作系统默认的临时目录下创建一个前缀为"go-ethereum-keystore"的目录
 		keydir, err = ioutil.TempDir("", "go-ethereum-keystore")
+		// 这种方式创建的私钥目录是一个暂时的目录
 		ephemeral = keydir
 	}
 
 	if err != nil {
 		return nil, "", err
 	}
+	// 如果keydir目录还没有被创建，就新建这个目录，并且权限是0700
 	if err := os.MkdirAll(keydir, 0700); err != nil {
 		return nil, "", err
 	}
