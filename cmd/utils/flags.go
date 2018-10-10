@@ -1046,12 +1046,16 @@ func SetNodeConfig(ctx *cli.Context, cfg *node.Config) {
 
 	switch {
 	case ctx.GlobalIsSet(DataDirFlag.Name):
+		// datadir flag
 		cfg.DataDir = ctx.GlobalString(DataDirFlag.Name)
 	case ctx.GlobalBool(DeveloperFlag.Name):
+		// 如果dev flag被设置为true，就使用内存数据库
 		cfg.DataDir = "" // unless explicitly requested, use memory databases
 	case ctx.GlobalBool(TestnetFlag.Name):
+		// testnet flag
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "testnet")
 	case ctx.GlobalBool(RinkebyFlag.Name):
+		// rinkeby flag
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "rinkeby")
 	}
 

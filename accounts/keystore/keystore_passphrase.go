@@ -50,18 +50,23 @@ const (
 
 	// StandardScryptN is the N parameter of Scrypt encryption algorithm, using 256MB
 	// memory and taking approximately 1s CPU time on a modern processor.
+	// 是Scrypt加密算法的N参数，在一个现代的处理上会使用256MB内存以及大约1秒钟CPU时间
+	// 注：什么是Scrypt：https://www.cryptocompare.com/coins/guides/what-is-scrypt/ TODO 对Scrypt还需要更深入的学习了解
 	StandardScryptN = 1 << 18
 
 	// StandardScryptP is the P parameter of Scrypt encryption algorithm, using 256MB
 	// memory and taking approximately 1s CPU time on a modern processor.
+	// 是Scrypt加密算法的P参数，在一个现代的处理上会使用256MB内存以及大约1秒钟CPU时间
 	StandardScryptP = 1
 
 	// LightScryptN is the N parameter of Scrypt encryption algorithm, using 4MB
 	// memory and taking approximately 100ms CPU time on a modern processor.
+	// 是Scrypt加密算法的N参数，在一个现代的处理上会使用4MB内存以及大约100毫秒CPU时间
 	LightScryptN = 1 << 12
 
 	// LightScryptP is the P parameter of Scrypt encryption algorithm, using 4MB
 	// memory and taking approximately 100ms CPU time on a modern processor.
+	// 是Scrypt加密算法的P参数，在一个现代的处理上会使用4MB内存以及大约100毫秒CPU时间
 	LightScryptP = 6
 
 	scryptR     = 8

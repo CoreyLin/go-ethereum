@@ -52,7 +52,7 @@ type Config struct {
 	// Name sets the instance name of the node. It must not contain the / character and is
 	// used in the devp2p node identifier. The instance name of geth is "geth". If no
 	// value is specified, the basename of the current executable is used.
-	// 代表节点的实例名。不能包含/，被用在devp2p节点标识符。geth的实例名是geth。如果值没有被指定，当前可执行文件的basename就是实例名
+	// 代表节点的实例名。不能包含/以及\，被用在devp2p节点标识符。geth的实例名是geth。如果值没有被指定，当前可执行文件的basename就是实例名
 	Name string `toml:"-"`
 
 	// UserIdent, if set, is used as an additional component in the devp2p node identifier.

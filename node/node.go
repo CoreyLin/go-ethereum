@@ -37,7 +37,7 @@ import (
 )
 
 // Node is a container on which services can be registered.
-// Node是一个容器，服务可以在Node上注册
+// Node是一个容器，各种服务可以在Node上注册
 type Node struct {
 	eventmux *event.TypeMux // Event multiplexer used between the services of a stack
 	config   *Config
@@ -75,26 +75,34 @@ type Node struct {
 }
 
 // New creates a new P2P node, ready for protocol registration.
+// 创建一个新的P2P节点，为协议注册做好准备
 func New(conf *Config) (*Node, error) {
 	// Copy config and resolve the datadir so future changes to the current
 	// working directory don't affect the node.
+	// 把conf指针指向的底层数据copy一份，赋给confCopy
 	confCopy := *conf
+	// 让conf指针指向新copy的confCopy
 	conf = &confCopy
 	if conf.DataDir != "" {
+		// 返回绝对路径，如果路径不是绝对路径，就在前面加上当前工作路径，然后转换为绝对路径
 		absdatadir, err := filepath.Abs(conf.DataDir)
 		if err != nil {
 			return nil, err
 		}
+		// 把DataDir的值重置为绝对路径
 		conf.DataDir = absdatadir
 	}
 	// Ensure that the instance name doesn't cause weird conflicts with
 	// other files in the data directory.
+	// 通过代码的方式确保节点的实例名不能包含/或者\
 	if strings.ContainsAny(conf.Name, `/\`) {
 		return nil, errors.New(`Config.Name must not contain '/' or '\'`)
 	}
+	// 确保节点的实例名不能为“keystore”
 	if conf.Name == datadirDefaultKeyStore {
 		return nil, errors.New(`Config.Name cannot be "` + datadirDefaultKeyStore + `"`)
 	}
+	// 确保节点的实例名不能以.ipc结尾
 	if strings.HasSuffix(conf.Name, ".ipc") {
 		return nil, errors.New(`Config.Name cannot end in ".ipc"`)
 	}
