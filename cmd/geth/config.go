@@ -154,6 +154,7 @@ func makeConfigNode(ctx *cli.Context) (*node.Node, gethConfig) {
 	// Apply flags.
 	// 把命令行输入的flag应用到程序的配置中去
 	utils.SetNodeConfig(ctx, &cfg.Node)
+	// 创建一个新的P2P节点，为协议注册做好准备
 	stack, err := node.New(&cfg.Node)
 	if err != nil {
 		utils.Fatalf("Failed to create the protocol stack: %v", err)

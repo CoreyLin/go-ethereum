@@ -39,31 +39,37 @@ import (
 // Node is a container on which services can be registered.
 // Node是一个容器，各种服务可以在Node上注册
 type Node struct {
+	// 在一个堆栈的服务之间使用的事件多路复用器
 	eventmux *event.TypeMux // Event multiplexer used between the services of a stack
 	config   *Config
 	accman   *accounts.Manager
 
+	// 如果值非空，在调用Node的Stop函数时，密钥文件夹会被删除
 	ephemeralKeystore string         // if non-empty, the key directory that will be removed by Stop
 	instanceDirLock   flock.Releaser // prevents concurrent use of instance directory
 
 	serverConfig p2p.Config
 	server       *p2p.Server // Currently running P2P networking layer
 
+	// 服务构造器（按照依赖顺序）
 	serviceFuncs []ServiceConstructor     // Service constructors (in dependency order)
 	services     map[reflect.Type]Service // Currently running services
 
 	rpcAPIs       []rpc.API   // List of APIs currently provided by the node
 	inprocHandler *rpc.Server // In-process RPC request handler to process the API requests
 
+	// 监听的IPC endpoint（如果为空，意味着IPC禁用）
 	ipcEndpoint string       // IPC endpoint to listen at (empty = IPC disabled)
 	ipcListener net.Listener // IPC RPC listener socket to serve API requests
 	ipcHandler  *rpc.Server  // IPC RPC request handler to process the API requests
 
+	// 监听的HTTP endpoint（主机接口+端口），如果为空意味着HTTP被禁用
 	httpEndpoint  string       // HTTP endpoint (interface + port) to listen at (empty = HTTP disabled)
 	httpWhitelist []string     // HTTP RPC modules to allow through this endpoint
 	httpListener  net.Listener // HTTP RPC listener socket to server API requests
 	httpHandler   *rpc.Server  // HTTP RPC request handler to process the API requests
 
+	// 监听的websocket endpoint（主机接口+端口），如果为空意味着websocket被禁用
 	wsEndpoint string       // Websocket endpoint (interface + port) to listen at (empty = websocket disabled)
 	wsListener net.Listener // Websocket RPC listener socket to server API requests
 	wsHandler  *rpc.Server  // Websocket RPC request handler to process the API requests
@@ -108,6 +114,7 @@ func New(conf *Config) (*Node, error) {
 	}
 	// Ensure that the AccountManager method works before the node has started.
 	// We rely on this in cmd/geth.
+	// 确保在节点启动之前账户管理器的函数能够正常工作。我们在cmd/geth里面依赖账户管理器
 	am, ephemeralKeystore, err := makeAccountManager(conf)
 	if err != nil {
 		return nil, err
@@ -117,6 +124,7 @@ func New(conf *Config) (*Node, error) {
 	}
 	// Note: any interaction with Config that would create/touch files
 	// in the data directory or instance directory is delayed until Start.
+	// 注意： 任何会在数据目录里创建文件的和Config的互动都会被推迟到Start函数
 	return &Node{
 		accman:            am,
 		ephemeralKeystore: ephemeralKeystore,

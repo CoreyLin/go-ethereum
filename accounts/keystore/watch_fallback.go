@@ -18,11 +18,13 @@
 
 // This is the fallback implementation of directory watching.
 // It is used on unsupported platforms.
+// 这是目录监控的后备实现。用在不支持的平台上。
 
 package keystore
 
 type watcher struct{ running bool }
 
+// TODO 删掉没有用到的*accountCache参数
 func newWatcher(*accountCache) *watcher { return new(watcher) }
 func (*watcher) start()                 {}
 func (*watcher) close()                 {}

@@ -43,6 +43,7 @@ const refreshCycle = time.Second
 const refreshThrottling = 500 * time.Millisecond
 
 // Hub is a accounts.Backend that can find and handle generic USB hardware wallets.
+// 实现了accounts.Backend接口，能够找到并处理通用USB硬件钱包
 type Hub struct {
 	scheme     string                  // Protocol scheme prefixing account and wallet URLs.
 	vendorID   uint16                  // USB vendor identifier used for device discovery
@@ -67,11 +68,13 @@ type Hub struct {
 }
 
 // NewLedgerHub creates a new hardware wallet manager for Ledger devices.
+// 对于Ledger设备，创建一个新的硬件钱包管理器
 func NewLedgerHub() (*Hub, error) {
 	return newHub(LedgerScheme, 0x2c97, []uint16{0x0000 /* Ledger Blue */, 0x0001 /* Ledger Nano S */}, 0xffa0, 0, newLedgerDriver)
 }
 
 // NewTrezorHub creates a new hardware wallet manager for Trezor devices.
+// 对于Trezor设备，创建一个新的硬件钱包管理器
 func NewTrezorHub() (*Hub, error) {
 	return newHub(TrezorScheme, 0x534c, []uint16{0x0001 /* Trezor 1 */}, 0xff00, 0, newTrezorDriver)
 }

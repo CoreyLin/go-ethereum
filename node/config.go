@@ -455,17 +455,21 @@ func makeAccountManager(conf *Config) (*accounts.Manager, string, error) {
 		return nil, "", err
 	}
 	// Assemble the account manager and supported backends
+	// 创建一个KeyStore实例
 	backends := []accounts.Backend{
+		// 新建并初始化一个KeyStore实例
 		keystore.NewKeyStore(keydir, scryptN, scryptP),
 	}
 	if !conf.NoUSB {
 		// Start a USB hub for Ledger hardware wallets
+		// 为Ledger硬件钱包启动一个USB hub，并且添加到backends切片中
 		if ledgerhub, err := usbwallet.NewLedgerHub(); err != nil {
 			log.Warn(fmt.Sprintf("Failed to start Ledger hub, disabling: %v", err))
 		} else {
 			backends = append(backends, ledgerhub)
 		}
 		// Start a USB hub for Trezor hardware wallets
+		// 为Trezor硬件钱包启动一个USB hub，并且添加到backends切片中
 		if trezorhub, err := usbwallet.NewTrezorHub(); err != nil {
 			log.Warn(fmt.Sprintf("Failed to start Trezor hub, disabling: %v", err))
 		} else {

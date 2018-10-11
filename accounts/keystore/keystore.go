@@ -47,6 +47,7 @@ var (
 )
 
 // KeyStoreType is the reflect type of a keystore backend.
+// keystore类型backend的类型
 var KeyStoreType = reflect.TypeOf(&KeyStore{})
 
 // KeyStoreScheme is the protocol scheme prefixing account and wallet URLs.
@@ -62,7 +63,7 @@ type KeyStore struct {
 	storage  keyStore                     // Storage backend, might be cleartext or encrypted
 	// 账户的内存缓存
 	cache    *accountCache                // In-memory account cache over the filesystem storage
-	// 从缓存接收变化通知的channel
+	// 从账户的内存缓存接收变化通知的channel
 	changes  chan struct{}                // Channel receiving change notifications from the cache
 	// 当前未锁定的账户（解密的私钥）
 	unlocked map[common.Address]*unlocked // Currently unlocked account (decrypted private keys)
@@ -84,6 +85,7 @@ type unlocked struct {
 }
 
 // NewKeyStore creates a keystore for the given directory.
+// 对于指定的keystore目录，新建一个KeyStore实例
 func NewKeyStore(keydir string, scryptN, scryptP int) *KeyStore {
 	keydir, _ = filepath.Abs(keydir)
 	ks := &KeyStore{storage: &keyStorePassphrase{keydir, scryptN, scryptP}}
@@ -114,13 +116,16 @@ func (ks *KeyStore) init(keydir string) {
 	// TODO: In order for this finalizer to work, there must be no references
 	// to ks. addressCache doesn't keep a reference but unlocked keys do,
 	// so the finalizer will not trigger until all timed unlocks have expired.
+	// ks实例在被垃圾回收之前执行close函数
 	runtime.SetFinalizer(ks, func(m *KeyStore) {
 		m.cache.close()
 	})
 	// Create the initial list of wallets from the cache
+	// 返回缓存中初始账户切片的拷贝（值拷贝）
 	accs := ks.cache.accounts()
 	ks.wallets = make([]accounts.Wallet, len(accs))
 	for i := 0; i < len(accs); i++ {
+		// 遍历KeyStore实例的accountCache的所有Account账户，对于每一个缓存中的账户，创建一个keystoreWallet
 		ks.wallets[i] = &keystoreWallet{account: accs[i], keystore: ks}
 	}
 }
@@ -186,6 +191,7 @@ func (ks *KeyStore) refreshWallets() {
 
 // Subscribe implements accounts.Backend, creating an async subscription to
 // receive notifications on the addition or removal of keystore wallets.
+// 实现了accounts.Backend接口，创建一个异步订阅，订阅钱包事件，用于在钱包添加或者移除的时候接收通知
 func (ks *KeyStore) Subscribe(sink chan<- accounts.WalletEvent) event.Subscription {
 	// We need the mutex to reliably start/stop the update loop
 	ks.mu.Lock()

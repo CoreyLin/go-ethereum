@@ -35,8 +35,15 @@ import (
 //
 // As such, these URLs should not be used outside of the scope of an Ethereum
 // wallet or account.
+// 代表一个钱包或者一个账户规范的标识URL
+// 它是url.URL的一个简化版本，拥有重要的局限性（也被认为是特性）：
+// 1.它仅仅包含值拷贝的模块，这个非常重要，只允许一个账户被拷贝，而不是账户的指针被拷贝
+// 2.同时对于特殊字符，不做任何URL编码和解码，这个很重要，确保了一种单一的规范的格式，而不是被RFC 3986
+//		定义的很多格式。所以，这些URL仅能在以太坊钱包或账户里面使用，不能超出这个范围，在外部无法使用
 type URL struct {
+	// 用于识别账户后端的协议方案
 	Scheme string // Protocol scheme to identify a capable account backend
+	// 用于识别一个唯一实体的后端路径
 	Path   string // Path for the backend to identify a unique entity
 }
 

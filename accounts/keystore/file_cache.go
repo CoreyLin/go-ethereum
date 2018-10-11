@@ -29,8 +29,11 @@ import (
 )
 
 // fileCache is a cache of files seen during scan of keystore.
+// 在扫描keystore期间发现的所有文件的缓存
 type fileCache struct {
+	// keystore目录下所有文件的集合
 	all     mapset.Set // Set of all files from the keystore folder
+	// 一个文件最后的修改时间点
 	lastMod time.Time  // Last time instance when a file was modified
 	mu      sync.RWMutex
 }

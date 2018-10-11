@@ -63,12 +63,14 @@ func (err *AmbiguousAddrError) Error() string {
 }
 
 // accountCache is a live index of all accounts in the keystore.
+// keystore里所有账户的实时索引
 type accountCache struct {
 	keydir   string
 	watcher  *watcher
 	mu       sync.Mutex
 	all      accountsByURL
 	byAddr   map[common.Address][]accounts.Account
+	// Timer表示仅触发一次事件的定时器
 	throttle *time.Timer
 	notify   chan struct{}
 	fileC    fileCache
@@ -78,6 +80,7 @@ func newAccountCache(keydir string) (*accountCache, chan struct{}) {
 	ac := &accountCache{
 		keydir: keydir,
 		byAddr: make(map[common.Address][]accounts.Account),
+		// 设置buffer chan的容量为1
 		notify: make(chan struct{}, 1),
 		fileC:  fileCache{all: mapset.NewThreadUnsafeSet()},
 	}
@@ -90,6 +93,7 @@ func (ac *accountCache) accounts() []accounts.Account {
 	ac.mu.Lock()
 	defer ac.mu.Unlock()
 	cpy := make([]accounts.Account, len(ac.all))
+	// 把ac.all切片拷贝一份到cpy切片，注意是值拷贝，不是指针拷贝
 	copy(cpy, ac.all)
 	return cpy
 }
@@ -219,9 +223,11 @@ func (ac *accountCache) close() {
 	ac.mu.Lock()
 	ac.watcher.close()
 	if ac.throttle != nil {
+		// 停止定时器
 		ac.throttle.Stop()
 	}
 	if ac.notify != nil {
+		// 关闭通道
 		close(ac.notify)
 		ac.notify = nil
 	}

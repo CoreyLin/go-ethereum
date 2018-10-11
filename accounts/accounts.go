@@ -28,8 +28,11 @@ import (
 
 // Account represents an Ethereum account located at a specific location defined
 // by the optional URL field.
+// 代表位于一个由可选URL属性定义的特定位置的以太坊账户
 type Account struct {
+	// 来源于私钥的以太坊账户地址
 	Address common.Address `json:"address"` // Ethereum account address derived from the key
+	// 在backend里面可选的资源定位器
 	URL     URL            `json:"url"`     // Optional resource locator within a backend
 }
 
@@ -157,15 +160,18 @@ type Backend interface {
 
 // WalletEventType represents the different event types that can be fired by
 // the wallet subscription subsystem.
+// 代表能够被钱包订阅系统（比如KeyStore）触发的不同的事件类型
 type WalletEventType int
 
 const (
 	// WalletArrived is fired when a new wallet is detected either via USB or via
 	// a filesystem event in the keystore.
+	// 当在keystore里一个新的钱包通过USB或者文件系统事件被检测到的时候被触发
 	WalletArrived WalletEventType = iota
 
 	// WalletOpened is fired when a wallet is successfully opened with the purpose
 	// of starting any background processes such as automatic key derivation.
+	// 当一个钱包被成功打开，并且目的是启动任何后台进程比如自动密钥派生，触发此事件
 	WalletOpened
 
 	// WalletDropped
@@ -174,7 +180,11 @@ const (
 
 // WalletEvent is an event fired by an account backend when a wallet arrival or
 // departure is detected.
+// 当一个钱包到来或者离开被检测到的时候，由账户backend（比如KeyStore）触发一个WalletEvent事件
+// 封装了一个钱包和这个钱包对应的事件
 type WalletEvent struct {
+	// 到来或者离开的钱包实例
 	Wallet Wallet          // Wallet instance arrived or departed
+	// 系统里发生的钱包事件类型
 	Kind   WalletEventType // Event type that happened in the system
 }

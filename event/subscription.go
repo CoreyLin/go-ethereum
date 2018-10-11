@@ -38,8 +38,16 @@ import (
 // The Unsubscribe method cancels the sending of events. You must call Unsubscribe in all
 // cases to ensure that resources related to the subscription are released. It can be
 // called any number of times.
+// 代表一个事件流。典型的事件载体是一个通道，但是这个载体并不是Subscription接口的一部分
+// 订阅在建立的时候可以失败。失败被通过一个error通道汇报。如果订阅出现了问题（比如分发事件的网络连接被关闭了），
+// 会收到一个值。只有一个值会被发送
+// 当订阅接口成功关闭（比如当事件来源被关闭）时，error通道也被关闭。Unsubscribe函数被调用时error通道也被关闭
+// Unsubscribe函数取消事件的发送。在所有的情况下必须调用Unsubscribe函数用以确保和订阅相关的资源被释放了。
+// Unsubscribe函数可以被调用任意次。
 type Subscription interface {
+	// 返回error通道
 	Err() <-chan error // returns the error channel
+	// 取消事件发送，并且关闭error通道
 	Unsubscribe()      // cancels sending of events, closing the error channel
 }
 

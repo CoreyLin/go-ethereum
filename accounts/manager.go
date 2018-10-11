@@ -26,12 +26,19 @@ import (
 
 // Manager is an overarching account manager that can communicate with various
 // backends for signing transactions.
+// 是一个能够和各种backend通信从而签署交易的包罗万象的账户管理器
 type Manager struct {
+	// 当前已经注册的backend
 	backends map[reflect.Type][]Backend // Index of backends currently registered
+
+	// 所有backend的钱包更新订阅
 	updaters []event.Subscription       // Wallet update subscriptions for all backends
+	// 对于backend钱包变化的订阅
 	updates  chan WalletEvent           // Subscription sink for backend wallet changes
+	// 所有注册的backend（比如KeyStore实例）包含的所有钱包的缓存
 	wallets  []Wallet                   // Cache of all wallets from all registered backends
 
+	// 钱包到来/离开的feed通知
 	feed event.Feed // Wallet feed notifying of arrivals/departures
 
 	quit chan chan error
@@ -40,20 +47,25 @@ type Manager struct {
 
 // NewManager creates a generic account manager to sign transaction via various
 // supported backends.
+// 通过各种支持的backend，创建一个通用的账户管理器用于签署交易
 func NewManager(backends ...Backend) *Manager {
 	// Retrieve the initial list of wallets from the backends and sort by URL
 	var wallets []Wallet
+	// 把所有backend里面的所有钱包都追加到wallets里面
 	for _, backend := range backends {
 		wallets = merge(wallets, backend.Wallets()...)
 	}
 	// Subscribe to wallet notifications from all backends
+	// 创建一个钱包事件的通道，通道的容量是backend的数量
 	updates := make(chan WalletEvent, 4*len(backends))
 
+	// 初始化一个Subscription切片，长度为backend的数量
 	subs := make([]event.Subscription, len(backends))
 	for i, backend := range backends {
 		subs[i] = backend.Subscribe(updates)
 	}
 	// Assemble the account manager and return
+	// 拼装一个账户管理器
 	am := &Manager{
 		backends: make(map[reflect.Type][]Backend),
 		updaters: subs,
@@ -61,10 +73,12 @@ func NewManager(backends ...Backend) *Manager {
 		wallets:  wallets,
 		quit:     make(chan chan error),
 	}
+	// 把不同类型的backend添加到对应的切片里面去，每种类型的backend对应一个切片
 	for _, backend := range backends {
 		kind := reflect.TypeOf(backend)
 		am.backends[kind] = append(am.backends[kind], backend)
 	}
+	// 用一个单独的goroutine来持续循环监听从backend来的钱包事件并且更新钱包缓存
 	go am.update()
 
 	return am
@@ -79,6 +93,7 @@ func (am *Manager) Close() error {
 
 // update is the wallet event loop listening for notifications from the backends
 // and updating the cache of wallets.
+// 持续循环监听从backend来的钱包事件并且更新钱包缓存
 func (am *Manager) update() {
 	// Close all subscriptions when the manager terminates
 	defer func() {
@@ -172,6 +187,8 @@ func (am *Manager) Subscribe(sink chan<- WalletEvent) event.Subscription {
 // origin list is preserved by inserting new wallets at the correct position.
 //
 // The original slice is assumed to be already sorted by URL.
+// 是对于钱包的排序的append操作，原来切片的元素顺序保留，把新钱包插入正确的位置
+// 原来的切片假设已经根据URL排序了
 func merge(slice []Wallet, wallets ...Wallet) []Wallet {
 	for _, wallet := range wallets {
 		n := sort.Search(len(slice), func(i int) bool { return slice[i].URL().Cmp(wallet.URL()) >= 0 })

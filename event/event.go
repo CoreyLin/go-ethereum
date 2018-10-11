@@ -38,6 +38,9 @@ type TypeMuxEvent struct {
 // The zero value is ready to use.
 //
 // Deprecated: use Feed
+// 分发事件到注册的接收者。接收者可以被注册用来处理某种类型的事件。当TypeMux在停止之后，调用任何函数都会返回ErrMuxClosed
+// 默认值就可以使用
+// 已经被废弃： 使用Feed
 type TypeMux struct {
 	mutex   sync.RWMutex
 	subm    map[reflect.Type][]*TypeMuxSubscription

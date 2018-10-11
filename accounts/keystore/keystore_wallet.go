@@ -26,8 +26,11 @@ import (
 
 // keystoreWallet implements the accounts.Wallet interface for the original
 // keystore.
+// 最初的keystore钱包，实现了accounts.Wallet接口
 type keystoreWallet struct {
+	// 包含在这个钱包里的单一账户
 	account  accounts.Account // Single account contained in this wallet
+	// 代表哪个keystore产生的这个单一账户
 	keystore *KeyStore        // Keystore where the account originates from
 }
 
