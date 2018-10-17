@@ -102,7 +102,9 @@ type Config struct {
 	// 数据库可选项
 	SkipBcVersionCheck bool `toml:"-"`
 	DatabaseHandles    int  `toml:"-"`
+	// 单位是MB
 	DatabaseCache      int
+	// 单位是MB
 	TrieCache          int
 	TrieTimeout        time.Duration
 

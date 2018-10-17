@@ -29,10 +29,14 @@ import (
 // ServiceContext is a collection of service independent options inherited from
 // the protocol stack, that is passed to all constructors to be optionally used;
 // as well as utility methods to operate on the service environment.
+// ServiceContext是从协议栈继承的服务独立选项的集合，它被传递给所有的构造函数可选地使用;以及在服务环境上操作的实用方法。
 type ServiceContext struct {
 	config         *Config
+	// 已构建服务的索引
 	services       map[reflect.Type]Service // Index of the already constructed services
+	// 用于解耦通知的事件多路复用器
 	EventMux       *event.TypeMux           // Event multiplexer used for decoupled notifications
+	// 由节点创建的账户管理器。
 	AccountManager *accounts.Manager        // Account manager created by the node.
 }
 
@@ -81,18 +85,26 @@ type ServiceConstructor func(ctx *ServiceContext) (Service, error)
 //
 // • Restart logic is not required as the node will create a fresh instance
 // every time a service is started.
+// 服务是可以注册到节点的单个协议。
+// 注：
+// • 服务生命周期管理委派给节点。允许服务在创建时自行初始化，但是不应该在Start方法之外执行goroutine。
+// • 不需要重新启动逻辑，因为每次启动服务时节点都会创建一个新实例。
 type Service interface {
 	// Protocols retrieves the P2P protocols the service wishes to start.
+	// Protocols检索服务希望启动的P2P协议。
 	Protocols() []p2p.Protocol
 
 	// APIs retrieves the list of RPC descriptors the service provides
+	// APIs检索服务提供的RPC描述符列表
 	APIs() []rpc.API
 
 	// Start is called after all services have been constructed and the networking
 	// layer was also initialized to spawn any goroutines required by the service.
+	// 在构建所有服务之后调用Start，并且还初始化网络层以生成服务所需的任何goroutine。
 	Start(server *p2p.Server) error
 
 	// Stop terminates all goroutines belonging to the service, blocking until they
 	// are all terminated.
+	// Stop终止属于该服务的所有goroutine，阻塞直到它们全部终止。
 	Stop() error
 }

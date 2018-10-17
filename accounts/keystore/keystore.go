@@ -240,6 +240,7 @@ func (ks *KeyStore) HasAddress(addr common.Address) bool {
 }
 
 // Accounts returns all key files present in the directory.
+// Accounts返回目录中存在的所有密钥文件。
 func (ks *KeyStore) Accounts() []accounts.Account {
 	return ks.cache.accounts()
 }
@@ -329,6 +330,7 @@ func (ks *KeyStore) SignTxWithPassphrase(a accounts.Account, passphrase string, 
 }
 
 // Unlock unlocks the given account indefinitely.
+// Unlock无限期解锁给定帐户。
 func (ks *KeyStore) Unlock(a accounts.Account, passphrase string) error {
 	return ks.TimedUnlock(a, passphrase, 0)
 }
@@ -352,6 +354,8 @@ func (ks *KeyStore) Lock(addr common.Address) error {
 // If the account address is already unlocked for a duration, TimedUnlock extends or
 // shortens the active unlock timeout. If the address was previously unlocked
 // indefinitely the timeout is not altered.
+// TimedUnlock使用passphrase解锁给定帐户。帐户在超时期间保持解锁状态。超时为0会解锁帐户，直到程序退出。该帐户必须与唯一密钥文件匹配。
+// 如果帐户地址已解锁一段时间，TimedUnlock会延长或缩短活动解锁超时。如果地址先前无限期解锁，则不会更改超时。
 func (ks *KeyStore) TimedUnlock(a accounts.Account, passphrase string, timeout time.Duration) error {
 	a, key, err := ks.getDecryptedKey(a, passphrase)
 	if err != nil {
@@ -421,6 +425,7 @@ func (ks *KeyStore) expire(addr common.Address, u *unlocked, timeout time.Durati
 
 // NewAccount generates a new key and stores it into the key directory,
 // encrypting it with the passphrase.
+// NewAccount生成一个新密钥并将其存储到密钥目录中，并使用密码加密它。
 func (ks *KeyStore) NewAccount(passphrase string) (accounts.Account, error) {
 	_, account, err := storeNewKey(ks.storage, crand.Reader, passphrase)
 	if err != nil {

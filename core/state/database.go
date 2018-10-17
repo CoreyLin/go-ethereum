@@ -27,6 +27,7 @@ import (
 )
 
 // Trie cache generation limit after which to evict trie nodes from memory.
+// Trie缓存生成限制，超过限制则从内存中驱逐trie节点。
 var MaxTrieCacheGen = uint16(120)
 
 const (

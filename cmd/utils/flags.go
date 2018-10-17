@@ -136,23 +136,28 @@ var (
 	}
 	NetworkIdFlag = cli.Uint64Flag{
 		Name:  "networkid",
+		// 网络标识符（整数，1 = Frontier，2 = Morden（废弃），3 = Ropsten，4 = Rinkeby），默认是1
 		Usage: "Network identifier (integer, 1=Frontier, 2=Morden (disused), 3=Ropsten, 4=Rinkeby)",
 		Value: eth.DefaultConfig.NetworkId,
 	}
 	TestnetFlag = cli.BoolFlag{
 		Name:  "testnet",
+		// Ropsten网络：预先配置的工作量证明测试网络
 		Usage: "Ropsten network: pre-configured proof-of-work test network",
 	}
 	RinkebyFlag = cli.BoolFlag{
 		Name:  "rinkeby",
+		// Rinkeby网络：预先配置的权威证明测试网络
 		Usage: "Rinkeby network: pre-configured proof-of-authority test network",
 	}
 	DeveloperFlag = cli.BoolFlag{
 		Name:  "dev",
+		// 短暂的权威证明网络与预先资助的开发者帐户，启用了挖矿
 		Usage: "Ephemeral proof-of-authority network with a pre-funded developer account, mining enabled",
 	}
 	DeveloperPeriodFlag = cli.IntFlag{
 		Name:  "dev.period",
+		// 在开发者模式下使用的区块时间段（0 =仅当交易处理暂挂时挖矿）
 		Usage: "Block period to use in developer mode (0 = mine only if transaction pending)",
 	}
 	IdentityFlag = cli.StringFlag{
@@ -161,6 +166,7 @@ var (
 	}
 	DocRootFlag = DirectoryFlag{
 		Name:  "docroot",
+		// HTTPClient文件方案的文档根目录，默认是用户家目录
 		Usage: "Document Root for HTTPClient file scheme",
 		Value: DirectoryString{homeDir()},
 	}
@@ -172,16 +178,19 @@ var (
 	}
 	GCModeFlag = cli.StringFlag{
 		Name:  "gcmode",
+		// 区块链垃圾收集模式（“完整”，“存档”）
 		Usage: `Blockchain garbage collection mode ("full", "archive")`,
 		Value: "full",
 	}
 	LightServFlag = cli.IntFlag{
 		Name:  "lightserv",
+		// 服务LES请求所允许的最大时间百分比（0-90），默认是0
 		Usage: "Maximum percentage of time allowed for serving LES requests (0-90)",
 		Value: 0,
 	}
 	LightPeersFlag = cli.IntFlag{
 		Name:  "lightpeers",
+		// LES客户端对等体的最大数量，默认是100
 		Usage: "Maximum number of LES client peers",
 		Value: eth.DefaultConfig.LightPeers,
 	}
@@ -196,121 +205,147 @@ var (
 	}
 	DashboardAddrFlag = cli.StringFlag{
 		Name:  "dashboard.addr",
+		// 仪表板监听接口，默认localhost
 		Usage: "Dashboard listening interface",
 		Value: dashboard.DefaultConfig.Host,
 	}
 	DashboardPortFlag = cli.IntFlag{
 		Name:  "dashboard.host",
+		// 仪表板监听端口，默认8080
 		Usage: "Dashboard listening port",
 		Value: dashboard.DefaultConfig.Port,
 	}
 	DashboardRefreshFlag = cli.DurationFlag{
 		Name:  "dashboard.refresh",
+		// 仪表板指标集合刷新率，默认5秒
 		Usage: "Dashboard metrics collection refresh rate",
 		Value: dashboard.DefaultConfig.Refresh,
 	}
 	// Ethash settings
 	EthashCacheDirFlag = DirectoryFlag{
 		Name:  "ethash.cachedir",
+		// 存储ethash验证缓存的目录（默认=在datadir内）
 		Usage: "Directory to store the ethash verification caches (default = inside the datadir)",
 	}
 	EthashCachesInMemoryFlag = cli.IntFlag{
 		Name:  "ethash.cachesinmem",
+		// 最近保留在内存中的ethash缓存数量（每个16MB），默认是2
 		Usage: "Number of recent ethash caches to keep in memory (16MB each)",
 		Value: eth.DefaultConfig.Ethash.CachesInMem,
 	}
 	EthashCachesOnDiskFlag = cli.IntFlag{
 		Name:  "ethash.cachesondisk",
+		// 最近保留在磁盘上的ethash缓存数量（每个16MB），默认是3
 		Usage: "Number of recent ethash caches to keep on disk (16MB each)",
 		Value: eth.DefaultConfig.Ethash.CachesOnDisk,
 	}
 	EthashDatasetDirFlag = DirectoryFlag{
 		Name:  "ethash.dagdir",
+		// 用于存储ethash挖矿DAG的目录（默认=在用户家目录内）
 		Usage: "Directory to store the ethash mining DAGs (default = inside home folder)",
 		Value: DirectoryString{eth.DefaultConfig.Ethash.DatasetDir},
 	}
 	EthashDatasetsInMemoryFlag = cli.IntFlag{
 		Name:  "ethash.dagsinmem",
+		// 最近的ethash挖矿DAG保留在内存中的数量（每个1 + GB），默认是1
 		Usage: "Number of recent ethash mining DAGs to keep in memory (1+GB each)",
 		Value: eth.DefaultConfig.Ethash.DatasetsInMem,
 	}
 	EthashDatasetsOnDiskFlag = cli.IntFlag{
 		Name:  "ethash.dagsondisk",
+		// 最近保留在磁盘上的ethash挖矿DAG的数量（每个1 + GB），默认是2
 		Usage: "Number of recent ethash mining DAGs to keep on disk (1+GB each)",
 		Value: eth.DefaultConfig.Ethash.DatasetsOnDisk,
 	}
 	// Transaction pool settings
+	// 交易池设置
 	TxPoolLocalsFlag = cli.StringFlag{
 		Name:  "txpool.locals",
+		// 被视为locals的逗号分隔的帐户（没有flush，优先包含）
 		Usage: "Comma separated accounts to treat as locals (no flush, priority inclusion)",
 	}
 	TxPoolNoLocalsFlag = cli.BoolFlag{
 		Name:  "txpool.nolocals",
+		// 禁用本地提交的交易的价格豁免
 		Usage: "Disables price exemptions for locally submitted transactions",
 	}
 	TxPoolJournalFlag = cli.StringFlag{
 		Name:  "txpool.journal",
+		// 用于本地交易的磁盘日志以幸免于节点重新启动
 		Usage: "Disk journal for local transaction to survive node restarts",
 		Value: core.DefaultTxPoolConfig.Journal,
 	}
 	TxPoolRejournalFlag = cli.DurationFlag{
 		Name:  "txpool.rejournal",
+		// 重新生成本地交易日志的时间间隔，默认是1小时
 		Usage: "Time interval to regenerate the local transaction journal",
 		Value: core.DefaultTxPoolConfig.Rejournal,
 	}
 	TxPoolPriceLimitFlag = cli.Uint64Flag{
 		Name:  "txpool.pricelimit",
+		// 实施接纳进交易池的最低gas价格限制，默认是1wei
 		Usage: "Minimum gas price limit to enforce for acceptance into the pool",
 		Value: eth.DefaultConfig.TxPool.PriceLimit,
 	}
 	TxPoolPriceBumpFlag = cli.Uint64Flag{
 		Name:  "txpool.pricebump",
+		// 用于替换一笔现有交易的价格暴涨百分比，默认是10
 		Usage: "Price bump percentage to replace an already existing transaction",
 		Value: eth.DefaultConfig.TxPool.PriceBump,
 	}
 	TxPoolAccountSlotsFlag = cli.Uint64Flag{
 		Name:  "txpool.accountslots",
+		// 每个帐户保证的最小可执行交易处理槽数，默认是16
 		Usage: "Minimum number of executable transaction slots guaranteed per account",
 		Value: eth.DefaultConfig.TxPool.AccountSlots,
 	}
 	TxPoolGlobalSlotsFlag = cli.Uint64Flag{
 		Name:  "txpool.globalslots",
+		// 所有帐户的最大可执行交易槽数，默认是4096
 		Usage: "Maximum number of executable transaction slots for all accounts",
 		Value: eth.DefaultConfig.TxPool.GlobalSlots,
 	}
 	TxPoolAccountQueueFlag = cli.Uint64Flag{
 		Name:  "txpool.accountqueue",
+		// 每个帐户允许的最大非可执行交易槽数，也就是队列里排队的交易数，默认是64
 		Usage: "Maximum number of non-executable transaction slots permitted per account",
 		Value: eth.DefaultConfig.TxPool.AccountQueue,
 	}
 	TxPoolGlobalQueueFlag = cli.Uint64Flag{
 		Name:  "txpool.globalqueue",
+		// 所有帐户的最大不可执行交易槽数，默认是1024
 		Usage: "Maximum number of non-executable transaction slots for all accounts",
 		Value: eth.DefaultConfig.TxPool.GlobalQueue,
 	}
 	TxPoolLifetimeFlag = cli.DurationFlag{
 		Name:  "txpool.lifetime",
+		// 非可执行交易排队的最长时间，默认是3小时
 		Usage: "Maximum amount of time non-executable transaction are queued",
 		Value: eth.DefaultConfig.TxPool.Lifetime,
 	}
 	// Performance tuning settings
+	// 性能调整设置
 	CacheFlag = cli.IntFlag{
 		Name:  "cache",
+		// 分配给内部缓存的兆字节内存，默认是1024M
 		Usage: "Megabytes of memory allocated to internal caching",
 		Value: 1024,
 	}
 	CacheDatabaseFlag = cli.IntFlag{
 		Name:  "cache.database",
+		// 用于数据库io的缓存内存容量百分比，默认75
 		Usage: "Percentage of cache memory allowance to use for database io",
 		Value: 75,
 	}
 	CacheGCFlag = cli.IntFlag{
 		Name:  "cache.gc",
+		// 用于trie修剪的缓存内存容量百分比
 		Usage: "Percentage of cache memory allowance to use for trie pruning",
 		Value: 25,
 	}
 	TrieCacheGenFlag = cli.IntFlag{
 		Name:  "trie-cache-gens",
+		// 要保留在内存中的trie节点生成数
 		Usage: "Number of trie node generations to keep in memory",
 		Value: int(state.MaxTrieCacheGen),
 	}
@@ -331,58 +366,70 @@ var (
 	}
 	MinerNotifyFlag = cli.StringFlag{
 		Name:  "miner.notify",
+		// 逗号分隔的HTTP URL列表以通知新的工作包
 		Usage: "Comma separated HTTP URL list to notify of new work packages",
 	}
 	MinerGasTargetFlag = cli.Uint64Flag{
 		Name:  "miner.gastarget",
+		// 已开采区块的目标gas的下限，默认8000000
 		Usage: "Target gas floor for mined blocks",
 		Value: eth.DefaultConfig.MinerGasFloor,
 	}
 	MinerLegacyGasTargetFlag = cli.Uint64Flag{
 		Name:  "targetgaslimit",
+		// 已开采区块的目标gas的下限（不建议使用，使用--miner.gastarget），默认1e9wei
 		Usage: "Target gas floor for mined blocks (deprecated, use --miner.gastarget)",
 		Value: eth.DefaultConfig.MinerGasFloor,
 	}
 	MinerGasLimitFlag = cli.Uint64Flag{
 		Name:  "miner.gaslimit",
+		// 采矿区块的目标gas的上限，默认8000000
 		Usage: "Target gas ceiling for mined blocks",
 		Value: eth.DefaultConfig.MinerGasCeil,
 	}
 	MinerGasPriceFlag = BigFlag{
 		Name:  "miner.gasprice",
+		// 采矿交易的最低gas价格，默认1GWei
 		Usage: "Minimum gas price for mining a transaction",
 		Value: eth.DefaultConfig.MinerGasPrice,
 	}
 	MinerLegacyGasPriceFlag = BigFlag{
 		Name:  "gasprice",
+		// 采矿交易的最低gas价格（不建议使用，使用--miner.gasprice），默认1GWei
 		Usage: "Minimum gas price for mining a transaction (deprecated, use --miner.gasprice)",
 		Value: eth.DefaultConfig.MinerGasPrice,
 	}
 	MinerEtherbaseFlag = cli.StringFlag{
 		Name:  "miner.etherbase",
+		// 区块挖矿奖励的公共地址（默认=第一个帐户）
 		Usage: "Public address for block mining rewards (default = first account)",
 		Value: "0",
 	}
 	MinerLegacyEtherbaseFlag = cli.StringFlag{
 		Name:  "etherbase",
+		// 区块挖矿奖励的公共地址（默认=第一个帐户，不建议使用，使用--miner.etherbase）
 		Usage: "Public address for block mining rewards (default = first account, deprecated, use --miner.etherbase)",
 		Value: "0",
 	}
 	MinerExtraDataFlag = cli.StringFlag{
 		Name:  "miner.extradata",
+		// 矿工设置的区块额外数据（默认=客户端版本）
 		Usage: "Block extra data set by the miner (default = client version)",
 	}
 	MinerLegacyExtraDataFlag = cli.StringFlag{
 		Name:  "extradata",
+		// 矿工设置的区块额外数据（默认=客户端版本，不推荐使用，使用--miner.extradata）
 		Usage: "Block extra data set by the miner (default = client version, deprecated, use --miner.extradata)",
 	}
 	MinerRecommitIntervalFlag = cli.DurationFlag{
 		Name:  "miner.recommit",
+		// 重新创建正在被挖掘的区块的时间间隔，默认3秒
 		Usage: "Time interval to recreate the block being mined",
 		Value: eth.DefaultConfig.MinerRecommit,
 	}
 	MinerNoVerfiyFlag = cli.BoolFlag{
 		Name:  "miner.noverify",
+		// 禁用远程密封验证
 		Usage: "Disable remote sealing verification",
 	}
 	// Account settings
@@ -399,11 +446,14 @@ var (
 
 	VMEnableDebugFlag = cli.BoolFlag{
 		Name:  "vmdebug",
+		// 记录对VM和合约调试有用的信息
 		Usage: "Record information useful for VM and contract debugging",
 	}
 	// Logging and debug settings
+	// 日志和调试设置
 	EthStatsURLFlag = cli.StringFlag{
 		Name:  "ethstats",
+		// ethstats服务的报告URL（节点名：secret@host:port）
 		Usage: "Reporting URL of a ethstats service (nodename:secret@host:port)",
 	}
 	FakePoWFlag = cli.BoolFlag{
@@ -550,13 +600,16 @@ var (
 	}
 
 	// Gas price oracle settings
+	// Gas价格oracle设置
 	GpoBlocksFlag = cli.IntFlag{
 		Name:  "gpoblocks",
+		// 检查gas价格的最近区块数量，默认值是20
 		Usage: "Number of recent blocks to check for gas prices",
 		Value: eth.DefaultConfig.GPO.Blocks,
 	}
 	GpoPercentileFlag = cli.IntFlag{
 		Name:  "gpopercentile",
+		// 建议的gas价格是一组近期交易gas价格的给定百分位数, 默认是60%
 		Usage: "Suggested gas price is the given percentile of a set of recent transaction gas prices",
 		Value: eth.DefaultConfig.GPO.Percentile,
 	}
@@ -566,6 +619,7 @@ var (
 	}
 	WhisperMaxMessageSizeFlag = cli.IntFlag{
 		Name:  "shh.maxmessagesize",
+		// 接受的最大消息大小，默认1MB
 		Usage: "Max message size accepted",
 		Value: int(whisper.DefaultMaxMessageSize),
 	}
@@ -576,6 +630,7 @@ var (
 	}
 	WhisperRestrictConnectionBetweenLightClientsFlag = cli.BoolFlag{
 		Name:  "shh.restrict-light",
+		// 限制两个whisper轻客户端之间的连接
 		Usage: "Restrict connection between two whisper light clients",
 	}
 
@@ -862,40 +917,53 @@ func setIPC(ctx *cli.Context, cfg *node.Config) {
 
 // makeDatabaseHandles raises out the number of allowed file handles per process
 // for Geth and returns half of the allowance to assign to the database.
+// makeDatabaseHandles为Geth提取每个进程允许的文件句柄数，并返回一半分配给数据库。
 func makeDatabaseHandles() int {
+	// 操作系统允许此进程打开的文件描述符的数量
 	limit, err := fdlimit.Current()
 	if err != nil {
 		Fatalf("Failed to retrieve file descriptor allowance: %v", err)
 	}
 	if limit < 2048 {
+		// 如果操作系统允许的最大文件句柄数小于2048，那么打印错误并且退出程序
 		if err := fdlimit.Raise(2048); err != nil {
 			Fatalf("Failed to raise file descriptor allowance: %v", err)
 		}
 	}
+	// 限制数据库文件描述符数量，即使有更多可用
 	if limit > 2048 { // cap database file descriptors even if more is available
 		limit = 2048
 	}
+	// 留下一半给网络和其他东西
 	return limit / 2 // Leave half for networking and other stuff
 }
 
 // MakeAddress converts an account specified directly as a hex encoded string or
 // a key index in the key store to an internal account representation.
+// MakeAddress将直接指定为十六进制编码字符串的帐户或密钥库中的密钥索引转换为内部帐户表示。
 func MakeAddress(ks *keystore.KeyStore, account string) (accounts.Account, error) {
 	// If the specified account is a valid address, return it
+	// 如果指定的帐户是有效地址，将其返回
 	if common.IsHexAddress(account) {
 		return accounts.Account{Address: common.HexToAddress(account)}, nil
 	}
 	// Otherwise try to interpret the account as a keystore index
+	// 否则尝试将该帐户解释为密钥库索引
 	index, err := strconv.Atoi(account)
 	if err != nil || index < 0 {
+		// %q用于string类型表示使用Go语法安全转义的双引号字符串
 		return accounts.Account{}, fmt.Errorf("invalid account address or index %q", account)
 	}
 	log.Warn("-------------------------------------------------------------------")
+	// 在密钥库文件夹中按顺序引用帐户是危险的！
 	log.Warn("Referring to accounts by order in the keystore folder is dangerous!")
+	// 此功能已弃用，将来会被删除！
 	log.Warn("This functionality is deprecated and will be removed in the future!")
+	// 请使用明确的地址！ （可以通过`geth account list`搜索）
 	log.Warn("Please use explicit addresses! (can search via `geth account list`)")
 	log.Warn("-------------------------------------------------------------------")
 
+	// 获取keystore目录中存在的所有账户
 	accs := ks.Accounts()
 	if len(accs) <= index {
 		return accounts.Account{}, fmt.Errorf("index %d higher than number of accounts %d", index, len(accs))
@@ -905,23 +973,27 @@ func MakeAddress(ks *keystore.KeyStore, account string) (accounts.Account, error
 
 // setEtherbase retrieves the etherbase either from the directly specified
 // command line flags or from the keystore if CLI indexed.
+// setEtherbase从直接指定的命令行flag或从CLI索引的密钥库中检索etherbase。
 func setEtherbase(ctx *cli.Context, ks *keystore.KeyStore, cfg *eth.Config) {
 	// Extract the current etherbase, new flag overriding legacy one
+	// 提取当前的etherbase，新flag覆盖旧flag
 	var etherbase string
 	if ctx.GlobalIsSet(MinerLegacyEtherbaseFlag.Name) {
 		// etherbase flag
 		etherbase = ctx.GlobalString(MinerLegacyEtherbaseFlag.Name)
 	}
 	if ctx.GlobalIsSet(MinerEtherbaseFlag.Name) {
-		// miner.etherbase flag
+		// miner.etherbase flag, 优先级高于etherbase flag
 		etherbase = ctx.GlobalString(MinerEtherbaseFlag.Name)
 	}
 	// Convert the etherbase into an address and configure it
+	// 将etherbase转换为地址并进行配置
 	if etherbase != "" {
 		account, err := MakeAddress(ks, etherbase)
 		if err != nil {
 			Fatalf("Invalid miner etherbase: %v", err)
 		}
+		// 把矿工账户的地址赋给cfg.Etherbase
 		cfg.Etherbase = account.Address
 	}
 }
@@ -1086,6 +1158,7 @@ func setGPO(ctx *cli.Context, cfg *gasprice.Config) {
 
 func setTxPool(ctx *cli.Context, cfg *core.TxPoolConfig) {
 	if ctx.GlobalIsSet(TxPoolLocalsFlag.Name) {
+		// txpool.locals flag
 		locals := strings.Split(ctx.GlobalString(TxPoolLocalsFlag.Name), ",")
 		for _, account := range locals {
 			if trimmed := strings.TrimSpace(account); !common.IsHexAddress(trimmed) {
@@ -1096,54 +1169,70 @@ func setTxPool(ctx *cli.Context, cfg *core.TxPoolConfig) {
 		}
 	}
 	if ctx.GlobalIsSet(TxPoolNoLocalsFlag.Name) {
+		// txpool.nolocals flag
 		cfg.NoLocals = ctx.GlobalBool(TxPoolNoLocalsFlag.Name)
 	}
 	if ctx.GlobalIsSet(TxPoolJournalFlag.Name) {
+		// txpool.journal flag
 		cfg.Journal = ctx.GlobalString(TxPoolJournalFlag.Name)
 	}
 	if ctx.GlobalIsSet(TxPoolRejournalFlag.Name) {
+		// txpool.rejournal flag
 		cfg.Rejournal = ctx.GlobalDuration(TxPoolRejournalFlag.Name)
 	}
 	if ctx.GlobalIsSet(TxPoolPriceLimitFlag.Name) {
+		// txpool.pricelimit flag
 		cfg.PriceLimit = ctx.GlobalUint64(TxPoolPriceLimitFlag.Name)
 	}
 	if ctx.GlobalIsSet(TxPoolPriceBumpFlag.Name) {
+		// txpool.pricebump flag
 		cfg.PriceBump = ctx.GlobalUint64(TxPoolPriceBumpFlag.Name)
 	}
 	if ctx.GlobalIsSet(TxPoolAccountSlotsFlag.Name) {
+		// txpool.accountslots flag
 		cfg.AccountSlots = ctx.GlobalUint64(TxPoolAccountSlotsFlag.Name)
 	}
 	if ctx.GlobalIsSet(TxPoolGlobalSlotsFlag.Name) {
+		// txpool.globalslots flag
 		cfg.GlobalSlots = ctx.GlobalUint64(TxPoolGlobalSlotsFlag.Name)
 	}
 	if ctx.GlobalIsSet(TxPoolAccountQueueFlag.Name) {
+		// txpool.accountqueue flag
 		cfg.AccountQueue = ctx.GlobalUint64(TxPoolAccountQueueFlag.Name)
 	}
 	if ctx.GlobalIsSet(TxPoolGlobalQueueFlag.Name) {
+		// txpool.globalqueue flag
 		cfg.GlobalQueue = ctx.GlobalUint64(TxPoolGlobalQueueFlag.Name)
 	}
 	if ctx.GlobalIsSet(TxPoolLifetimeFlag.Name) {
+		// txpool.lifetime flag
 		cfg.Lifetime = ctx.GlobalDuration(TxPoolLifetimeFlag.Name)
 	}
 }
 
 func setEthash(ctx *cli.Context, cfg *eth.Config) {
 	if ctx.GlobalIsSet(EthashCacheDirFlag.Name) {
+		// ethash.cachedir flag
 		cfg.Ethash.CacheDir = ctx.GlobalString(EthashCacheDirFlag.Name)
 	}
 	if ctx.GlobalIsSet(EthashDatasetDirFlag.Name) {
+		// ethash.dagdir flag
 		cfg.Ethash.DatasetDir = ctx.GlobalString(EthashDatasetDirFlag.Name)
 	}
 	if ctx.GlobalIsSet(EthashCachesInMemoryFlag.Name) {
+		// ethash.cachesinmem flag
 		cfg.Ethash.CachesInMem = ctx.GlobalInt(EthashCachesInMemoryFlag.Name)
 	}
 	if ctx.GlobalIsSet(EthashCachesOnDiskFlag.Name) {
+		// ethash.cachesondisk flag
 		cfg.Ethash.CachesOnDisk = ctx.GlobalInt(EthashCachesOnDiskFlag.Name)
 	}
 	if ctx.GlobalIsSet(EthashDatasetsInMemoryFlag.Name) {
+		// ethash.dagsinmem flag
 		cfg.Ethash.DatasetsInMem = ctx.GlobalInt(EthashDatasetsInMemoryFlag.Name)
 	}
 	if ctx.GlobalIsSet(EthashDatasetsOnDiskFlag.Name) {
+		// ethash.dagsondisk flag
 		cfg.Ethash.DatasetsOnDisk = ctx.GlobalInt(EthashDatasetsOnDiskFlag.Name)
 	}
 }
@@ -1188,8 +1277,10 @@ func checkExclusive(ctx *cli.Context, args ...interface{}) {
 }
 
 // SetShhConfig applies shh-related command line flags to the config.
+// SetShhConfig将与shh相关的命令行flag应用于配置。
 func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
 	if ctx.GlobalIsSet(WhisperMaxMessageSizeFlag.Name) {
+		// shh.maxmessagesize flag
 		cfg.MaxMessageSize = uint32(ctx.GlobalUint(WhisperMaxMessageSizeFlag.Name))
 	}
 	if ctx.GlobalIsSet(WhisperMinPOWFlag.Name) {
@@ -1210,18 +1301,24 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 
 	// 获取节点上的第一个KeyStore实例
 	ks := stack.AccountManager().Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
+	// 从直接指定的命令行flag或从CLI索引的密钥库中检索etherbase
 	setEtherbase(ctx, ks, cfg)
 	setGPO(ctx, &cfg.GPO)
+	// 把交易池相关的flag应用到配置
 	setTxPool(ctx, &cfg.TxPool)
+	// 把Ethash挖矿的一些flag应用到配置
 	setEthash(ctx, cfg)
 
 	if ctx.GlobalIsSet(SyncModeFlag.Name) {
+		// syncmode flag
 		cfg.SyncMode = *GlobalTextMarshaler(ctx, SyncModeFlag.Name).(*downloader.SyncMode)
 	}
 	if ctx.GlobalIsSet(LightServFlag.Name) {
+		// lightserv flag
 		cfg.LightServ = ctx.GlobalInt(LightServFlag.Name)
 	}
 	if ctx.GlobalIsSet(LightPeersFlag.Name) {
+		// lightpeers flag
 		cfg.LightPeers = ctx.GlobalInt(LightPeersFlag.Name)
 	}
 	if ctx.GlobalIsSet(NetworkIdFlag.Name) {
@@ -1229,85 +1326,110 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	}
 
 	if ctx.GlobalIsSet(CacheFlag.Name) || ctx.GlobalIsSet(CacheDatabaseFlag.Name) {
+		// 如果cache flag或cache.database flag其中之一被设置
 		cfg.DatabaseCache = ctx.GlobalInt(CacheFlag.Name) * ctx.GlobalInt(CacheDatabaseFlag.Name) / 100
 	}
+	// 为Geth提取每个进程允许的文件句柄数，并返回一半分配给数据库。
 	cfg.DatabaseHandles = makeDatabaseHandles()
 
 	if gcmode := ctx.GlobalString(GCModeFlag.Name); gcmode != "full" && gcmode != "archive" {
+		// gcmode flag
 		Fatalf("--%s must be either 'full' or 'archive'", GCModeFlag.Name)
 	}
 	cfg.NoPruning = ctx.GlobalString(GCModeFlag.Name) == "archive"
 
 	if ctx.GlobalIsSet(CacheFlag.Name) || ctx.GlobalIsSet(CacheGCFlag.Name) {
+		// cache flag或cache.gc flag其中之一存在
 		cfg.TrieCache = ctx.GlobalInt(CacheFlag.Name) * ctx.GlobalInt(CacheGCFlag.Name) / 100
 	}
 	if ctx.GlobalIsSet(MinerNotifyFlag.Name) {
+		// miner.notify flag
 		cfg.MinerNotify = strings.Split(ctx.GlobalString(MinerNotifyFlag.Name), ",")
 	}
 	if ctx.GlobalIsSet(DocRootFlag.Name) {
+		// docroot flag
 		cfg.DocRoot = ctx.GlobalString(DocRootFlag.Name)
 	}
 	if ctx.GlobalIsSet(MinerLegacyExtraDataFlag.Name) {
+		// extradata flag
 		cfg.MinerExtraData = []byte(ctx.GlobalString(MinerLegacyExtraDataFlag.Name))
 	}
 	if ctx.GlobalIsSet(MinerExtraDataFlag.Name) {
+		// miner.extradata flag
 		cfg.MinerExtraData = []byte(ctx.GlobalString(MinerExtraDataFlag.Name))
 	}
 	if ctx.GlobalIsSet(MinerLegacyGasTargetFlag.Name) {
+		// targetgaslimit flag
 		cfg.MinerGasFloor = ctx.GlobalUint64(MinerLegacyGasTargetFlag.Name)
 	}
 	if ctx.GlobalIsSet(MinerGasTargetFlag.Name) {
+		// miner.gastarget flag
 		cfg.MinerGasFloor = ctx.GlobalUint64(MinerGasTargetFlag.Name)
 	}
 	if ctx.GlobalIsSet(MinerGasLimitFlag.Name) {
+		// miner.gaslimit flag
 		cfg.MinerGasCeil = ctx.GlobalUint64(MinerGasLimitFlag.Name)
 	}
 	if ctx.GlobalIsSet(MinerLegacyGasPriceFlag.Name) {
+		// gasprice flag
 		cfg.MinerGasPrice = GlobalBig(ctx, MinerLegacyGasPriceFlag.Name)
 	}
 	if ctx.GlobalIsSet(MinerGasPriceFlag.Name) {
+		// miner.gasprice flag
 		cfg.MinerGasPrice = GlobalBig(ctx, MinerGasPriceFlag.Name)
 	}
 	if ctx.GlobalIsSet(MinerRecommitIntervalFlag.Name) {
+		// miner.recommit flag
 		cfg.MinerRecommit = ctx.Duration(MinerRecommitIntervalFlag.Name)
 	}
 	if ctx.GlobalIsSet(MinerNoVerfiyFlag.Name) {
+		// miner.noverify flag
 		cfg.MinerNoverify = ctx.Bool(MinerNoVerfiyFlag.Name)
 	}
 	if ctx.GlobalIsSet(VMEnableDebugFlag.Name) {
+		// vmdebug flag
 		// TODO(fjl): force-enable this in --dev mode
 		cfg.EnablePreimageRecording = ctx.GlobalBool(VMEnableDebugFlag.Name)
 	}
 
 	// Override any default configs for hard coded networks.
+	// 覆盖硬编码网络的任何默认配置。
 	switch {
 	case ctx.GlobalBool(TestnetFlag.Name):
+		// 如果testnet flag设置为true，并且networkid flag没有设置，那么把NetworkId设置为3（代表ropsten）；
+		// 如果networkid flag已经设置了，那testnet flag就不生效。说明networkid flag优先级更高
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 3
 		}
 		cfg.Genesis = core.DefaultTestnetGenesisBlock()
 	case ctx.GlobalBool(RinkebyFlag.Name):
+		// rinkeby flag
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 4
 		}
 		cfg.Genesis = core.DefaultRinkebyGenesisBlock()
 	case ctx.GlobalBool(DeveloperFlag.Name):
+		// dev flag
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 1337
 		}
 		// Create new developer account or reuse existing one
+		// 创建新的开发者帐户或重用现有帐户
 		var (
 			developer accounts.Account
 			err       error
 		)
 		if accs := ks.Accounts(); len(accs) > 0 {
+			// 把keystore缓存的第一个账户赋给开发者账户
 			developer = ks.Accounts()[0]
 		} else {
+			// 新建一个开发者账户，密码是空字符串
 			developer, err = ks.NewAccount("")
 			if err != nil {
 				Fatalf("Failed to create developer account: %v", err)
 			}
 		}
+		// 无限期解锁开发者账户
 		if err := ks.Unlock(developer, ""); err != nil {
 			Fatalf("Failed to unlock developer account: %v", err)
 		}
@@ -1325,6 +1447,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 }
 
 // SetDashboardConfig applies dashboard related command line flags to the config.
+// SetDashboardConfig将与仪表板相关的命令行flag应用于配置。
 func SetDashboardConfig(ctx *cli.Context, cfg *dashboard.Config) {
 	cfg.Host = ctx.GlobalString(DashboardAddrFlag.Name)
 	cfg.Port = ctx.GlobalInt(DashboardPortFlag.Name)
@@ -1332,6 +1455,7 @@ func SetDashboardConfig(ctx *cli.Context, cfg *dashboard.Config) {
 }
 
 // RegisterEthService adds an Ethereum client to the stack.
+// RegisterEthService将以太坊客户端添加到堆栈。
 func RegisterEthService(stack *node.Node, cfg *eth.Config) {
 	var err error
 	if cfg.SyncMode == downloader.LightSync {

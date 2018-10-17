@@ -176,10 +176,12 @@ func BigToAddress(b *big.Int) Address { return BytesToAddress(b.Bytes()) }
 
 // HexToAddress returns Address with byte values of s.
 // If s is larger than len(h), s will be cropped from the left.
+// HexToAddress返回地址，其字节值为s。如果s大于len（h），则s将从左侧裁剪。
 func HexToAddress(s string) Address { return BytesToAddress(FromHex(s)) }
 
 // IsHexAddress verifies whether a string can represent a valid hex-encoded
 // Ethereum address or not.
+// IsHexAddress验证字符串是否可以表示有效的十六进制编码的以太坊地址。
 func IsHexAddress(s string) bool {
 	if hasHexPrefix(s) {
 		s = s[2:]

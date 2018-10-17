@@ -310,6 +310,7 @@ func DefaultGenesisBlock() *Genesis {
 }
 
 // DefaultTestnetGenesisBlock returns the Ropsten network genesis block.
+// DefaultTestnetGenesisBlock返回Ropsten网络创世区块。
 func DefaultTestnetGenesisBlock() *Genesis {
 	return &Genesis{
 		Config:     params.TestnetChainConfig,
@@ -322,6 +323,7 @@ func DefaultTestnetGenesisBlock() *Genesis {
 }
 
 // DefaultRinkebyGenesisBlock returns the Rinkeby network genesis block.
+// DefaultRinkebyGenesisBlock返回Rinkeby网络创世区块。
 func DefaultRinkebyGenesisBlock() *Genesis {
 	return &Genesis{
 		Config:     params.RinkebyChainConfig,
@@ -335,6 +337,7 @@ func DefaultRinkebyGenesisBlock() *Genesis {
 
 // DeveloperGenesisBlock returns the 'geth --dev' genesis block. Note, this must
 // be seeded with the
+// DeveloperGenesisBlock返回'geth --dev'创世区块。注意，这必须用
 func DeveloperGenesisBlock(period uint64, faucet common.Address) *Genesis {
 	// Override the default period to the user requested one
 	config := *params.AllCliqueProtocolChanges
