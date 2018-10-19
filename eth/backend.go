@@ -204,12 +204,14 @@ func makeExtraData(extra []byte) []byte {
 }
 
 // CreateDB creates the chain database.
+// CreateDB创建链数据库。
 func CreateDB(ctx *node.ServiceContext, config *Config, name string) (ethdb.Database, error) {
 	db, err := ctx.OpenDatabase(name, config.DatabaseCache, config.DatabaseHandles)
 	if err != nil {
 		return nil, err
 	}
 	if db, ok := db.(*ethdb.LDBDatabase); ok {
+		// 如果是LDBDatabase，不是内存数据库，则配置数据库度量/指标收集器
 		db.Meter("eth/db/chaindata/")
 	}
 	return db, nil

@@ -60,6 +60,12 @@ func (self Storage) Copy() Storage {
 // First you need to obtain a state object.
 // Account values can be accessed and modified through the object.
 // Finally, call CommitTrie to write the modified storage trie into a database.
+// stateObject表示正在被修改的以太坊帐户。
+//
+// 使用模式如下：
+// 首先，您需要获取一个状态对象。
+// 可以通过对象访问和修改帐户值。
+// 最后，调用CommitTrie将修改后的存储trie写入数据库。
 type stateObject struct {
 	address  common.Address
 	addrHash common.Hash // hash of ethereum address of the account
@@ -83,12 +89,15 @@ type stateObject struct {
 	// Cache flags.
 	// When an object is marked suicided it will be delete from the trie
 	// during the "update" phase of the state transition.
+	// 缓存标志。
+	// 当一个对象被标记为自杀时，它将在状态转换的“更新”阶段从trie中删除。
 	dirtyCode bool // true if the code was updated
 	suicided  bool
 	deleted   bool
 }
 
 // empty returns whether the account is considered empty.
+// empty返回帐户是否为空。
 func (s *stateObject) empty() bool {
 	return s.data.Nonce == 0 && s.data.Balance.Sign() == 0 && bytes.Equal(s.data.CodeHash, emptyCodeHash)
 }
@@ -160,6 +169,7 @@ func (c *stateObject) getTrie(db Database) Trie {
 }
 
 // GetState returns a value in account storage.
+// GetState返回帐户存储中的值。
 func (self *stateObject) GetState(db Database, key common.Hash) common.Hash {
 	value, exists := self.cachedStorage[key]
 	if exists {
@@ -183,6 +193,7 @@ func (self *stateObject) GetState(db Database, key common.Hash) common.Hash {
 }
 
 // SetState updates a value in account storage.
+// SetState更新帐户存储中的值。
 func (self *stateObject) SetState(db Database, key, value common.Hash) {
 	self.db.journal.append(storageChange{
 		account:  &self.address,
@@ -235,6 +246,8 @@ func (self *stateObject) CommitTrie(db Database) error {
 
 // AddBalance removes amount from c's balance.
 // It is used to add funds to the destination account of a transfer.
+// AddBalance添加资金到c的余额。
+// 它用于将资金添加到转移的目标帐户。
 func (c *stateObject) AddBalance(amount *big.Int) {
 	// EIP158: We must check emptiness for the objects such that the account
 	// clearing (0,0,0 objects) can take effect.

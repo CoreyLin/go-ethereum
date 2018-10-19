@@ -31,6 +31,7 @@ import (
 // as well as utility methods to operate on the service environment.
 // ServiceContext是从协议栈继承的服务独立选项的集合，它被传递给所有的构造函数可选地使用;以及在服务环境上操作的实用方法。
 type ServiceContext struct {
+	// 注意，这个config是和Node（节点）相关的config
 	config         *Config
 	// 已构建服务的索引
 	services       map[reflect.Type]Service // Index of the already constructed services
@@ -43,6 +44,7 @@ type ServiceContext struct {
 // OpenDatabase opens an existing database with the given name (or creates one
 // if no previous can be found) from within the node's data directory. If the
 // node is an ephemeral one, a memory database is returned.
+// OpenDatabase从节点的数据目录中打开具有给定名称的现有数据库（如果找不到，则创建一个）。如果节点是短暂的节点，则返回内存数据库。
 func (ctx *ServiceContext) OpenDatabase(name string, cache int, handles int) (ethdb.Database, error) {
 	if ctx.config.DataDir == "" {
 		return ethdb.NewMemDatabase(), nil

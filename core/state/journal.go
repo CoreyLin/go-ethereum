@@ -35,12 +35,16 @@ type journalEntry interface {
 // journal contains the list of state modifications applied since the last state
 // commit. These are tracked to be able to be reverted in case of an execution
 // exception or revertal request.
+// journal包含自上次状态提交以来应用的状态修改列表。跟踪这些状态修改是在执行异常或恢复请求的情况下能够恢复的。
 type journal struct {
+	// 被日志追踪的当前变化
 	entries []journalEntry         // Current changes tracked by the journal
+	// 脏帐户和更改次数
 	dirties map[common.Address]int // Dirty accounts and the number of changes
 }
 
 // newJournal create a new initialized journal.
+// newJournal创建一个新的初始化日志。
 func newJournal() *journal {
 	return &journal{
 		dirties: make(map[common.Address]int),

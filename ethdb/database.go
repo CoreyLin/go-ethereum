@@ -67,6 +67,7 @@ type LDBDatabase struct {
 }
 
 // NewLDBDatabase returns a LevelDB wrapped object.
+// NewLDBDatabase返回LevelDB包装对象。
 func NewLDBDatabase(file string, cache int, handles int) (*LDBDatabase, error) {
 	logger := log.New("database", file) // New一个带上下文的logger，每次打印的时候都会把database的名字打印出来
 

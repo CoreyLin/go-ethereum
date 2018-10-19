@@ -33,6 +33,11 @@ import (
 // the preimage of each key.
 //
 // SecureTrie is not safe for concurrent use.
+// SecureTrie用密钥哈希包裹一个trie。在安全的trie中，所有访问操作都使用keccak256对密钥进行哈希。这可以防止调用代码创建长链节点，从而增加访问时间。
+//
+// 与常规trie相反，SecureTrie只能使用New创建，并且必须具有附加数据库。数据库还存储每个密钥的原像。
+//
+// SecureTrie对于并发使用是不安全的。
 type SecureTrie struct {
 	trie             Trie
 	hashKeyBuf       [common.HashLength]byte
@@ -51,6 +56,14 @@ type SecureTrie struct {
 // Loaded nodes are kept around until their 'cache generation' expires.
 // A new cache generation is created by each call to Commit.
 // cachelimit sets the number of past cache generations to keep.
+// NewSecure使用后备数据库和可选的中间内存节点池中的现有根节点创建一个trie。
+//
+// 如果root是零哈希或空字符串的sha3哈希，则trie最初为空。否则，如果db为nil，则New将发生panic，如果找不到根节点，则返回MissingNodeError。
+//
+// 根据需要从数据库或节点池访问trie加载节点。
+// 加载的节点保持不变，直到它们的“缓存生成”到期。
+// 每次调用Commit都会创建一个新的缓存生成。
+// cachelimit设置要保留的过去缓存生成的数量。
 func NewSecure(root common.Hash, db *Database, cachelimit uint16) (*SecureTrie, error) {
 	if db == nil {
 		panic("trie.NewSecure called without a database")
@@ -157,6 +170,7 @@ func (t *SecureTrie) Commit(onleaf LeafCallback) (root common.Hash, err error) {
 
 // Hash returns the root hash of SecureTrie. It does not write to the
 // database and can be used even if the trie doesn't have one.
+// Hash返回SecureTrie的根哈希。它不会写入数据库，即使trie没有，也可以使用它。
 func (t *SecureTrie) Hash() common.Hash {
 	return t.trie.Hash()
 }

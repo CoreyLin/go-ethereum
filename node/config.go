@@ -292,6 +292,7 @@ var isOldGethResource = map[string]bool{
 }
 
 // ResolvePath resolves path in the instance directory.
+// ResolvePath解析实例目录中的路径。
 func (c *Config) ResolvePath(path string) string {
 	if filepath.IsAbs(path) {
 		return path

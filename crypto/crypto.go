@@ -52,6 +52,7 @@ func Keccak256(data ...[]byte) []byte {
 
 // Keccak256Hash calculates and returns the Keccak256 hash of the input data,
 // converting it to an internal Hash data structure.
+// Keccak256Hash计算并返回输入数据的Keccak256哈希，将其转换为内部哈希数据结构。
 func Keccak256Hash(data ...[]byte) (h common.Hash) {
 	d := sha3.NewKeccak256()
 	for _, b := range data {

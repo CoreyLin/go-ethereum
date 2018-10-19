@@ -44,6 +44,7 @@ var errGenesisNoConfig = errors.New("genesis has no chain configuration")
 
 // Genesis specifies the header fields, state of a genesis block. It also defines hard
 // fork switch-over blocks through the chain configuration.
+// Genesis指定头字段，创世区块的状态。它还通过链配置定义硬叉切换区块。
 type Genesis struct {
 	Config     *params.ChainConfig `json:"config"`
 	Nonce      uint64              `json:"nonce"`
@@ -57,12 +58,14 @@ type Genesis struct {
 
 	// These fields are used for consensus tests. Please don't use them
 	// in actual genesis blocks.
+	// 这些字段用于一致性测试。请不要在实际的创世区块中使用它们。
 	Number     uint64      `json:"number"`
 	GasUsed    uint64      `json:"gasUsed"`
 	ParentHash common.Hash `json:"parentHash"`
 }
 
 // GenesisAlloc specifies the initial state that is part of the genesis block.
+// GenesisAlloc指定作为genesis区块一部分的初始状态。
 type GenesisAlloc map[common.Address]GenesisAccount
 
 func (ga *GenesisAlloc) UnmarshalJSON(data []byte) error {
@@ -78,8 +81,10 @@ func (ga *GenesisAlloc) UnmarshalJSON(data []byte) error {
 }
 
 // GenesisAccount is an account in the state of the genesis block.
+// GenesisAccount是创世区块状态下的帐户。
 type GenesisAccount struct {
 	Code       []byte                      `json:"code,omitempty"`
+	// 一个账户里可以存储一些键值对的数据
 	Storage    map[common.Hash]common.Hash `json:"storage,omitempty"`
 	Balance    *big.Int                    `json:"balance" gencodec:"required"`
 	Nonce      uint64                      `json:"nonce,omitempty"`
@@ -150,18 +155,32 @@ func (e *GenesisMismatchError) Error() string {
 // error is a *params.ConfigCompatError and the new, unwritten config is returned.
 //
 // The returned chain configuration is never nil.
+// SetupGenesisBlock在db中写入或更新genesis区块。将使用的区块是：
+//                          genesis == nil       genesis != nil
+//                       +------------------------------------------
+//     db has no genesis |  main-net default  |  genesis
+//     db has genesis    |  from DB           |  genesis (if compatible)
+//
+// 如果存储的链配置是兼容的（即没有在本地头块下面指定一个fork块），它将被更新。如果发生冲突，则错误为*params.ConfigCompatError，并返回新的未写入配置。
+// 返回的链配置永远不会是nil。
 func SetupGenesisBlock(db ethdb.Database, genesis *Genesis) (*params.ChainConfig, common.Hash, error) {
+	// 如果创世区块存在，但链配置不存在
 	if genesis != nil && genesis.Config == nil {
 		return params.AllEthashProtocolChanges, common.Hash{}, errGenesisNoConfig
 	}
 
 	// Just commit the new block if there is no stored genesis block.
+	// 如果没有存储的genesis区块，就提交新区块。
+	// 获取区块号为0的hash，区块号为0代表创世区块
 	stored := rawdb.ReadCanonicalHash(db, 0)
+	// 如果区块hash为空
 	if (stored == common.Hash{}) {
 		if genesis == nil {
+			// 写入默认的主网创世区块
 			log.Info("Writing default main-net genesis block")
 			genesis = DefaultGenesisBlock()
 		} else {
+			// 写入自定义的创世区块
 			log.Info("Writing custom genesis block")
 		}
 		block, err := genesis.Commit(db)
@@ -220,12 +239,16 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 
 // ToBlock creates the genesis block and writes state of a genesis specification
 // to the given database (or discards it if nil).
+// ToBlock创建genesis区块并将genesis规范的状态写入给定的数据库（如果为nil则将其丢弃）。
 func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	if db == nil {
+		// 如果db为nil，则新建一个内存数据库
 		db = ethdb.NewMemDatabase()
 	}
+	// 这里state.NewDatabase(db)返回的是一个cachingDB
 	statedb, _ := state.New(common.Hash{}, state.NewDatabase(db))
 	for addr, account := range g.Alloc {
+		// 以下几个操作都是对和addr相关的stateObject做操作，给其属性赋值
 		statedb.AddBalance(addr, account.Balance)
 		statedb.SetCode(addr, account.Code)
 		statedb.SetNonce(addr, account.Nonce)
@@ -233,6 +256,7 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 			statedb.SetState(addr, key, value)
 		}
 	}
+	// 获取状态trie的当前根哈希值
 	root := statedb.IntermediateRoot(false)
 	head := &types.Header{
 		Number:     new(big.Int).SetUint64(g.Number),
@@ -261,6 +285,8 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 
 // Commit writes the block and state of a genesis specification to the database.
 // The block is committed as the canonical head block.
+// Commit将创世规范的块和状态写入数据库。
+// 该块作为规范的头块提交。
 func (g *Genesis) Commit(db ethdb.Database) (*types.Block, error) {
 	block := g.ToBlock(db)
 	if block.Number().Sign() != 0 {
@@ -298,6 +324,7 @@ func GenesisBlockForTesting(db ethdb.Database, addr common.Address, balance *big
 }
 
 // DefaultGenesisBlock returns the Ethereum main net genesis block.
+// DefaultGenesisBlock返回以太坊主网络创世块。
 func DefaultGenesisBlock() *Genesis {
 	return &Genesis{
 		Config:     params.MainnetChainConfig,

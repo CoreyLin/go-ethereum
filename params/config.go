@@ -32,6 +32,7 @@ var (
 
 var (
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
+	// MainnetChainConfig是在主网络上运行节点的链参数。
 	MainnetChainConfig = &ChainConfig{
 		ChainID:             big.NewInt(1),
 		HomesteadBlock:      big.NewInt(1150000),
@@ -84,6 +85,9 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
+	// AllEthashProtocolChanges包含由以太坊核心开发人员引入和接受到Ethash共识的每个协议变更（EIP）。
+	//
+	// 此配置有意不使用键控字段用于强制任何向配置添加flag的人也必须设置这些字段。
 	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), nil, false, big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
@@ -102,25 +106,38 @@ var (
 // ChainConfig is stored in the database on a per block basis. This means
 // that any network, identified by its genesis block, can have its own
 // set of configuration options.
+// ChainConfig是确定区块链设置的核心配置。
+// ChainConfig基于每个区块存储在数据库中。这意味着由其创世区块标识的任何网络都可以拥有自己的一组配置选项。
 type ChainConfig struct {
+	// chainId标识当前链并用于重放保护
 	ChainID *big.Int `json:"chainId"` // chainId identifies the current chain and is used for replay protection
 
+	// Homestead切换区块（nil=没有硬叉，0 =已经是Homestead）
 	HomesteadBlock *big.Int `json:"homesteadBlock,omitempty"` // Homestead switch block (nil = no fork, 0 = already homestead)
 
+	// TheDAO硬叉切换区块（nil =无硬叉）
 	DAOForkBlock   *big.Int `json:"daoForkBlock,omitempty"`   // TheDAO hard-fork switch block (nil = no fork)
+	// 节点是支持还是反对DAO硬分叉
 	DAOForkSupport bool     `json:"daoForkSupport,omitempty"` // Whether the nodes supports or opposes the DAO hard-fork
 
 	// EIP150 implements the Gas price changes (https://github.com/ethereum/EIPs/issues/150)
+	// EIP150实施gas价格变动 (https://github.com/ethereum/EIPs/issues/150),EIP150硬分叉区块
 	EIP150Block *big.Int    `json:"eip150Block,omitempty"` // EIP150 HF block (nil = no fork)
+	// EIP150硬分叉哈希（由于只有gas价格发生变化，因此只有头部客户端需要）
 	EIP150Hash  common.Hash `json:"eip150Hash,omitempty"`  // EIP150 HF hash (needed for header only clients as only gas pricing changed)
 
+	// EIP155硬分叉区块
 	EIP155Block *big.Int `json:"eip155Block,omitempty"` // EIP155 HF block
+	// EIP158硬分叉区块
 	EIP158Block *big.Int `json:"eip158Block,omitempty"` // EIP158 HF block
 
+	// 拜占庭切换区块（nil =无硬叉，0 =已经在拜占庭）
 	ByzantiumBlock      *big.Int `json:"byzantiumBlock,omitempty"`      // Byzantium switch block (nil = no fork, 0 = already on byzantium)
+	// 君士坦丁堡切换区块（nil =无硬叉，0 =已激活）
 	ConstantinopleBlock *big.Int `json:"constantinopleBlock,omitempty"` // Constantinople switch block (nil = no fork, 0 = already activated)
 
 	// Various consensus engines
+	// 各种共识引擎
 	Ethash *EthashConfig `json:"ethash,omitempty"`
 	Clique *CliqueConfig `json:"clique,omitempty"`
 }

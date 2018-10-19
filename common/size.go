@@ -22,6 +22,7 @@ import (
 
 // StorageSize is a wrapper around a float value that supports user friendly
 // formatting.
+// StorageSize是一个支持用户友好格式的浮点值的包装器。
 type StorageSize float64
 
 // String implements the stringer interface.

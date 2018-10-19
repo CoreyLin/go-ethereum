@@ -40,9 +40,11 @@ var (
 // A BlockNonce is a 64-bit hash which proves (combined with the
 // mix-hash) that a sufficient amount of computation has been carried
 // out on a block.
+// BlockNonce是64位哈希，证明（与mix-hash相结合）已对区块执行了足够的计算量。
 type BlockNonce [8]byte
 
 // EncodeNonce converts the given integer to a block nonce.
+// EncodeNonce将给定的整数转换为区块随机数。
 func EncodeNonce(i uint64) BlockNonce {
 	var n BlockNonce
 	binary.BigEndian.PutUint64(n[:], i)
@@ -67,6 +69,7 @@ func (n *BlockNonce) UnmarshalText(input []byte) error {
 //go:generate gencodec -type Header -field-override headerMarshaling -out gen_header_json.go
 
 // Header represents a block header in the Ethereum blockchain.
+// Header表示以太坊区块链中的区块头部。
 type Header struct {
 	ParentHash  common.Hash    `json:"parentHash"       gencodec:"required"`
 	UncleHash   common.Hash    `json:"sha3Uncles"       gencodec:"required"`

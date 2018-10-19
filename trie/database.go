@@ -61,25 +61,40 @@ type DatabaseReader interface {
 // Database is an intermediate write layer between the trie data structures and
 // the disk database. The aim is to accumulate trie writes in-memory and only
 // periodically flush a couple tries to disk, garbage collecting the remainder.
+// Database是trie数据结构和磁盘数据库之间的中间写层。目的是在内存中累积trie写入，并且只定期将一些tries刷新到磁盘，垃圾收集剩余部分。
 type Database struct {
+	// 成熟trie节点的持久存储
 	diskdb ethdb.Database // Persistent storage for matured trie nodes
 
+	// 节点的数据和引用关系
 	nodes  map[common.Hash]*cachedNode // Data and references relationships of a node
+	// 最老的跟踪节点，刷新列表头
 	oldest common.Hash                 // Oldest tracked node, flush-list head
+	// 最新的跟踪节点，刷新列表尾
 	newest common.Hash                 // Newest tracked node, flush-list tail
 
+	// 来自安全trie的节点的预先映像
 	preimages map[common.Hash][]byte // Preimages of nodes from the secure trie
+	// 用于计算原像密钥的短暂缓冲区
 	seckeybuf [secureKeyLength]byte  // Ephemeral buffer for calculating preimage keys
 
+	// 自上次提交以来花在垃圾收集上的时间
 	gctime  time.Duration      // Time spent on garbage collection since last commit
+	// 自上次提交以来收集的节点垃圾
 	gcnodes uint64             // Nodes garbage collected since last commit
+	// 自上次提交以来收集的数据存储垃圾
 	gcsize  common.StorageSize // Data storage garbage collected since last commit
 
+	// 自上次提交以来花在数据刷新上的时间
 	flushtime  time.Duration      // Time spent on data flushing since last commit
+	// 自上次提交后刷新的节点
 	flushnodes uint64             // Nodes flushed since last commit
+	// 自上次提交后刷新的数据存储
 	flushsize  common.StorageSize // Data storage flushed since last commit
 
+	// 节点缓存的存储大小（exc.flushlist）
 	nodesSize     common.StorageSize // Storage size of the nodes cache (exc. flushlist)
+	// 原像缓存的存储大小
 	preimagesSize common.StorageSize // Storage size of the preimages cache
 
 	lock sync.RWMutex

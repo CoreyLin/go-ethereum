@@ -31,6 +31,7 @@ import (
 	"github.com/ethereum/go-ethereum/trie"
 )
 
+// 修订
 type revision struct {
 	id           int
 	journalIndex int
@@ -49,11 +50,15 @@ var (
 // nested states. It's the general query interface to retrieve:
 // * Contracts
 // * Accounts
+// 以太坊协议中的StateDB用于存储merkle trie中的任何内容。 StateDB负责缓存和存储嵌套状态。这是检索的通用查询接口：
+// * 合约
+// * 账户
 type StateDB struct {
 	db   Database
 	trie Trie
 
 	// This map holds 'live' objects, which will get modified while processing a state transition.
+	// 此映射包含“实时”对象，在处理状态转换时将对其进行修改。
 	stateObjects      map[common.Address]*stateObject
 	stateObjectsDirty map[common.Address]struct{}
 
@@ -62,9 +67,12 @@ type StateDB struct {
 	// unable to deal with database-level errors. Any error that occurs
 	// during a database read is memoized here and will eventually be returned
 	// by StateDB.Commit.
+	// 数据库错误。
+	// 共识核心和VM使用状态对象，它们无法处理数据库级错误。在数据库读取期间发生的任何错误都会在此处进行记忆，并最终由StateDB.Commit返回。
 	dbErr error
 
 	// The refund counter, also used by state transitioning.
+	// 退款计数器，也用于状态过渡。
 	refund uint64
 
 	thash, bhash common.Hash
@@ -76,6 +84,7 @@ type StateDB struct {
 
 	// Journal of state modifications. This is the backbone of
 	// Snapshot and RevertToSnapshot.
+	// 状态修改日志。这是Snapshot和RevertToSnapshot的主干。
 	journal        *journal
 	validRevisions []revision
 	nextRevisionId int
@@ -84,7 +93,9 @@ type StateDB struct {
 }
 
 // Create a new state from a given trie.
+// 从给定的trie创建一个新state。
 func New(root common.Hash, db Database) (*StateDB, error) {
+	// 调用cachingDB的OpenTrie，返回cachedTrie
 	tr, err := db.OpenTrie(root)
 	if err != nil {
 		return nil, err
@@ -273,6 +284,7 @@ func (self *StateDB) HasSuicided(addr common.Address) bool {
  */
 
 // AddBalance adds amount to the account associated with addr.
+// AddBalance将金额添加到与addr关联的帐户。
 func (self *StateDB) AddBalance(addr common.Address, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
@@ -352,6 +364,7 @@ func (self *StateDB) updateStateObject(stateObject *stateObject) {
 }
 
 // deleteStateObject removes the given object from the state trie.
+// deleteStateObject从状态trie中删除给定对象。
 func (self *StateDB) deleteStateObject(stateObject *stateObject) {
 	stateObject.deleted = true
 	addr := stateObject.Address()
@@ -359,6 +372,7 @@ func (self *StateDB) deleteStateObject(stateObject *stateObject) {
 }
 
 // Retrieve a state object given by the address. Returns nil if not found.
+// 检索给定地址的状态对象。如果找不到则返回nil。
 func (self *StateDB) getStateObject(addr common.Address) (stateObject *stateObject) {
 	// Prefer 'live' objects.
 	if obj := self.stateObjects[addr]; obj != nil {
@@ -390,6 +404,7 @@ func (self *StateDB) setStateObject(object *stateObject) {
 }
 
 // Retrieve a state object or create a new state object if nil.
+// 检索一个状态对象或创建新的状态对象，如果为nil。
 func (self *StateDB) GetOrNewStateObject(addr common.Address) *stateObject {
 	stateObject := self.getStateObject(addr)
 	if stateObject == nil || stateObject.deleted {
@@ -400,6 +415,7 @@ func (self *StateDB) GetOrNewStateObject(addr common.Address) *stateObject {
 
 // createObject creates a new state object. If there is an existing account with
 // the given address, it is overwritten and returned as the second return value.
+// createObject创建一个新的状态对象。如果存在具有给定地址的现有帐户，则将其覆盖并作为第二个返回值返回。
 func (self *StateDB) createObject(addr common.Address) (newobj, prev *stateObject) {
 	prev = self.getStateObject(addr)
 	newobj = newObject(self, addr, Account{})
@@ -562,6 +578,8 @@ func (s *StateDB) Finalise(deleteEmptyObjects bool) {
 // IntermediateRoot computes the current root hash of the state trie.
 // It is called in between transactions to get the root hash that
 // goes into transaction receipts.
+// IntermediateRoot计算状态trie的当前根哈希值。
+// 在交易之间调用它以获取进入交易收据的根哈希。
 func (s *StateDB) IntermediateRoot(deleteEmptyObjects bool) common.Hash {
 	s.Finalise(deleteEmptyObjects)
 	return s.trie.Hash()
@@ -582,6 +600,7 @@ func (s *StateDB) clearJournalAndRefund() {
 }
 
 // Commit writes the state to the underlying in-memory trie database.
+// Commit将状态写入底层的内存中trie数据库。
 func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) {
 	defer s.clearJournalAndRefund()
 
@@ -589,12 +608,15 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 		s.stateObjectsDirty[addr] = struct{}{}
 	}
 	// Commit objects to the trie.
+	// 将对象提交到trie。
 	for addr, stateObject := range s.stateObjects {
+		// isDirty就是ok语法，用于判断这个地址在脏数据里是否存在
 		_, isDirty := s.stateObjectsDirty[addr]
 		switch {
 		case stateObject.suicided || (isDirty && deleteEmptyObjects && stateObject.empty()):
 			// If the object has been removed, don't bother syncing it
 			// and just mark it for deletion in the trie.
+			// 如果该对象已被删除，不要费心同步它，只需在trie中将其标记为删除即可。
 			s.deleteStateObject(stateObject)
 		case isDirty:
 			// Write any contract code associated with the state object

@@ -28,6 +28,7 @@ import (
 )
 
 // ReadCanonicalHash retrieves the hash assigned to a canonical block number.
+// ReadCanonicalHash检索分配给规范区块编号的哈希。
 func ReadCanonicalHash(db DatabaseReader, number uint64) common.Hash {
 	data, _ := db.Get(headerHashKey(number))
 	if len(data) == 0 {

@@ -36,31 +36,40 @@ const (
 	maxPastTries = 12
 
 	// Number of codehash->size associations to keep.
+	// 要保留的codehash->size关联数。
 	codeSizeCacheSize = 100000
 )
 
 // Database wraps access to tries and contract code.
+// Database包含对tries和合约代码的访问。
 type Database interface {
 	// OpenTrie opens the main account trie.
+	// OpenTrie打开主帐户trie。
 	OpenTrie(root common.Hash) (Trie, error)
 
 	// OpenStorageTrie opens the storage trie of an account.
+	// OpenStorageTrie打开帐户的存储trie。
 	OpenStorageTrie(addrHash, root common.Hash) (Trie, error)
 
 	// CopyTrie returns an independent copy of the given trie.
+	//CopyTrie返回给定trie的独立副本。
 	CopyTrie(Trie) Trie
 
 	// ContractCode retrieves a particular contract's code.
+	// ContractCode检索特定合约的代码。
 	ContractCode(addrHash, codeHash common.Hash) ([]byte, error)
 
 	// ContractCodeSize retrieves a particular contracts code's size.
+	// ContractCodeSize检索特定合约代码的大小。
 	ContractCodeSize(addrHash, codeHash common.Hash) (int, error)
 
 	// TrieDB retrieves the low level trie database used for data storage.
+	// TrieDB检索用于数据存储的低级别trie数据库。
 	TrieDB() *trie.Database
 }
 
 // Trie is a Ethereum Merkle Trie.
+// Trie是以太坊Merkle Trie。
 type Trie interface {
 	TryGet(key []byte) ([]byte, error)
 	TryUpdate(key, value []byte) error
@@ -76,7 +85,9 @@ type Trie interface {
 // concurrent use and retains cached trie nodes in memory. The pool is an optional
 // intermediate trie-node memory pool between the low level storage layer and the
 // high level trie abstraction.
+// NewDatabase为状态创建后备存储。返回的数据库对于并发使用是安全的，并且在内存中保留缓存的trie节点。池是低级存储层和高级trie抽象之间的可选中间trie节点内存池。
 func NewDatabase(db ethdb.Database) Database {
+	// 创建一个线程安全，固定大小为十万的LRU缓存
 	csc, _ := lru.New(codeSizeCacheSize)
 	return &cachingDB{
 		db:            trie.NewDatabase(db),
@@ -92,12 +103,14 @@ type cachingDB struct {
 }
 
 // OpenTrie opens the main account trie.
+// OpenTrie打开主帐户trie。
 func (db *cachingDB) OpenTrie(root common.Hash) (Trie, error) {
 	db.mu.Lock()
 	defer db.mu.Unlock()
 
 	for i := len(db.pastTries) - 1; i >= 0; i-- {
 		if db.pastTries[i].Hash() == root {
+			// 从db.pastTries里从后往前遍历，如果有和root相等的哈希
 			return cachedTrie{db.pastTries[i].Copy(), db}, nil
 		}
 	}
@@ -161,6 +174,7 @@ func (db *cachingDB) TrieDB() *trie.Database {
 }
 
 // cachedTrie inserts its trie into a cachingDB on commit.
+// cachedTrie在提交时将其trie插入到cachingDB中。
 type cachedTrie struct {
 	*trie.SecureTrie
 	db *cachingDB
