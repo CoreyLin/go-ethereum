@@ -257,6 +257,7 @@ func (tx *Transaction) RawSignatureValues() (*big.Int, *big.Int, *big.Int) {
 }
 
 // Transactions is a Transaction slice type for basic sorting.
+// Transactions是用于基本排序的交易切片类型。
 type Transactions []*Transaction
 
 // Len returns the length of s.

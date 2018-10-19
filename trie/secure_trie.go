@@ -153,6 +153,9 @@ func (t *SecureTrie) GetKey(shaKey []byte) []byte {
 //
 // Committing flushes nodes from memory. Subsequent Get calls will load nodes
 // from the database.
+// Commit将所有节点和安全哈希预映像写入trie的数据库。
+// 节点以sha3哈希作为密钥存储。
+// 提交从内存中刷新节点。后续的Get调用将从数据库加载节点。
 func (t *SecureTrie) Commit(onleaf LeafCallback) (root common.Hash, err error) {
 	// Write all the pre-images to the actual disk database
 	if len(t.getSecKeyCache()) > 0 {

@@ -41,9 +41,11 @@ type revision struct {
 
 var (
 	// emptyState is the known hash of an empty state trie entry.
+	// emptyState是空状态trie条目的已知哈希。
 	emptyState = crypto.Keccak256Hash(nil)
 
 	// emptyCode is the known hash of the empty EVM bytecode.
+	// emptyCode是空EVM字节码的已知哈希。
 	emptyCode = crypto.Keccak256Hash(nil)
 )
 
@@ -297,6 +299,7 @@ func (self *StateDB) GetCommittedState(addr common.Address, hash common.Hash) co
 }
 
 // Database retrieves the low level database supporting the lower level trie ops.
+// Database检索支持较低级别trie操作的低级数据库。
 func (self *StateDB) Database() Database {
 	return self.db
 }
@@ -395,6 +398,7 @@ func (self *StateDB) Suicide(addr common.Address) bool {
 //
 
 // updateStateObject writes the given object to the trie.
+// updateStateObject将给定对象写入trie。
 func (self *StateDB) updateStateObject(stateObject *stateObject) {
 	addr := stateObject.Address()
 	data, err := rlp.EncodeToBytes(stateObject)
@@ -656,20 +660,25 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 			s.deleteStateObject(stateObject)
 		case isDirty:
 			// Write any contract code associated with the state object
+			// 写入与状态对象关联的任何合约代码
 			if stateObject.code != nil && stateObject.dirtyCode {
+				// 把该stateObject的合约代码的哈希和合约代码的映射写入内存数据库
 				s.db.TrieDB().InsertBlob(common.BytesToHash(stateObject.CodeHash()), stateObject.code)
 				stateObject.dirtyCode = false
 			}
 			// Write any storage changes in the state object to its storage trie.
+			// 将状态对象中的任何存储更改写入其存储trie。
 			if err := stateObject.CommitTrie(s.db); err != nil {
 				return common.Hash{}, err
 			}
 			// Update the object in the main account trie.
+			// 更新主帐户trie中的对象。
 			s.updateStateObject(stateObject)
 		}
 		delete(s.stateObjectsDirty, addr)
 	}
 	// Write trie changes.
+	// 写入trie变化/更新
 	root, err = s.trie.Commit(func(leaf []byte, parent common.Hash) error {
 		var account Account
 		if err := rlp.DecodeBytes(leaf, &account); err != nil {
@@ -684,6 +693,7 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 		}
 		return nil
 	})
+	// 提交后Trie缓存统计信息
 	log.Debug("Trie cache stats after commit", "misses", trie.CacheMisses(), "unloads", trie.CacheUnloads())
 	return root, err
 }

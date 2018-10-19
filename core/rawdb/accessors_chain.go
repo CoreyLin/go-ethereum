@@ -52,6 +52,7 @@ func DeleteCanonicalHash(db DatabaseDeleter, number uint64) {
 }
 
 // ReadHeaderNumber returns the header number assigned to a hash.
+// ReadHeaderNumber返回分配给一个哈希的区块头部号。
 func ReadHeaderNumber(db DatabaseReader, hash common.Hash) *uint64 {
 	data, _ := db.Get(headerNumberKey(hash))
 	if len(data) != 8 {
@@ -62,6 +63,7 @@ func ReadHeaderNumber(db DatabaseReader, hash common.Hash) *uint64 {
 }
 
 // ReadHeadHeaderHash retrieves the hash of the current canonical head header.
+// ReadHeadHeaderHash检索当前规范头区块的头部的哈希值。
 func ReadHeadHeaderHash(db DatabaseReader) common.Hash {
 	data, _ := db.Get(headHeaderKey)
 	if len(data) == 0 {

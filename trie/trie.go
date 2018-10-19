@@ -43,6 +43,7 @@ var (
 // CacheMisses retrieves a global counter measuring the number of cache misses
 // the trie had since process startup. This isn't useful for anything apart from
 // trie debugging purposes.
+// CacheMisses检索一个全局计数器，测量自进程启动以来trie的缓存未命中数。除了trie调试之外，这对任何事情都没有用。
 func CacheMisses() int64 {
 	return cacheMissCounter.Count()
 }
@@ -50,6 +51,7 @@ func CacheMisses() int64 {
 // CacheUnloads retrieves a global counter measuring the number of cache unloads
 // the trie did since process startup. This isn't useful for anything apart from
 // trie debugging purposes.
+// CacheUnloads检索一个全局计数器，测量自进程启动以来trie执行的缓存未加载次数。除了trie调试之外，这对任何事情都没有用。
 func CacheUnloads() int64 {
 	return cacheUnloadCounter.Count()
 }
@@ -57,6 +59,7 @@ func CacheUnloads() int64 {
 // LeafCallback is a callback type invoked when a trie operation reaches a leaf
 // node. It's used by state sync and commit to allow handling external references
 // between account and storage tries.
+// LeafCallback是当trie操作到达叶节点时调用的回调类型。状态同步和提交使用它来允许处理帐户和存储tries之间的外部引用。
 type LeafCallback func(leaf []byte, parent common.Hash) error
 
 // Trie is a Merkle Patricia Trie.

@@ -133,6 +133,9 @@ func Decode(r io.Reader, val interface{}) error {
 // DecodeBytes parses RLP data from b into val.
 // Please see the documentation of Decode for the decoding rules.
 // The input must contain exactly one value and no trailing data.
+// DecodeBytes将b中的RLP数据解析为val。
+// 有关解码规则，请参阅解码文档。
+// 输入必须只包含一个值而不包含尾随数据。
 func DecodeBytes(b []byte, val interface{}) error {
 	// TODO: this could use a Stream from a pool.
 	r := bytes.NewReader(b)

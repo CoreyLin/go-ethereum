@@ -295,6 +295,7 @@ func (db *Database) DiskDB() DatabaseReader {
 // yet unknown. This method should only be used for non-trie nodes that require
 // reference counting, since trie nodes are garbage collected directly through
 // their embedded children.
+// 如果尚未知，InsertBlob会将新的引用跟踪blob写入内存数据库。此方法仅应用于需要引用计数的非trie节点，因为trie节点直接通过其嵌入的子节点被垃圾收集。
 func (db *Database) InsertBlob(hash common.Hash, blob []byte) {
 	db.lock.Lock()
 	defer db.lock.Unlock()
@@ -306,6 +307,7 @@ func (db *Database) InsertBlob(hash common.Hash, blob []byte) {
 // a more generic version of InsertBlob, supporting both raw blob insertions as
 // well ex trie node insertions. The blob must always be specified to allow proper
 // size tracking.
+// insert将折叠的trie节点插入内存数据库。此方法是InsertBlob的更通用版本，支持原始blob插入以及ex trie节点插入。必须始终指定blob以允许正确的大小跟踪。
 func (db *Database) insert(hash common.Hash, blob []byte, node node) {
 	// If the node's already cached, skip
 	if _, ok := db.nodes[hash]; ok {
@@ -420,6 +422,7 @@ func (db *Database) Nodes() []common.Hash {
 }
 
 // Reference adds a new reference from a parent node to a child node.
+// Reference将父节点的新引用添加到子节点。
 func (db *Database) Reference(child common.Hash, parent common.Hash) {
 	db.lock.RLock()
 	defer db.lock.RUnlock()
@@ -620,6 +623,8 @@ func (db *Database) Cap(limit common.StorageSize) error {
 // to disk, forcefully tearing down all references in both directions.
 //
 // As a side effect, all pre-images accumulated up to this point are also written.
+// Commit迭代特定节点的所有子节点，将它们写入磁盘，强行拆除两个方向上的所有引用。
+// 作为副作用，到此为止累积的所有预先图像也被写入。
 func (db *Database) Commit(node common.Hash, report bool) error {
 	// Create a database batch to flush persistent data out. It is important that
 	// outside code doesn't see an inconsistent state (referenced data removed from

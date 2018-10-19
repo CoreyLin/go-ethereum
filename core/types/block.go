@@ -126,21 +126,29 @@ type Body struct {
 }
 
 // Block represents an entire block in the Ethereum blockchain.
+// Block代表以太坊区块链中的一个完整区块。
 type Block struct {
 	header       *Header
 	uncles       []*Header
 	transactions Transactions
 
 	// caches
+	// 缓存
+	// Value提供原子加载并存储一致类型的值。
+	// Value的零值从Load返回nil。
+	// 调用Store后，一个Value不得被复制。
+	// 首次使用后，一个Value不得被复制。
 	hash atomic.Value
 	size atomic.Value
 
 	// Td is used by package core to store the total difficulty
 	// of the chain up to and including the block.
+	// core包使用Td来存储链的总难度，包括这个区块。
 	td *big.Int
 
 	// These fields are used by package eth to track
 	// inter-peer block relay.
+	// eth包用这些字段来跟踪对等体区块中继。
 	ReceivedAt   time.Time
 	ReceivedFrom interface{}
 }
@@ -181,6 +189,8 @@ type storageblock struct {
 // The values of TxHash, UncleHash, ReceiptHash and Bloom in header
 // are ignored and set to values derived from the given txs, uncles
 // and receipts.
+// NewBlock创建一个新区块。复制输入数据，更改头部和字段值不会影响区块。
+// 头部中的TxHash，UncleHash，ReceiptHash和Bloom的值将被忽略，并设置为从给定的txs，uncles和receipts派生的值。
 func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*Receipt) *Block {
 	b := &Block{header: CopyHeader(header), td: new(big.Int)}
 
@@ -359,6 +369,8 @@ func (b *Block) WithBody(transactions []*Transaction, uncles []*Header) *Block {
 
 // Hash returns the keccak256 hash of b's header.
 // The hash is computed on the first call and cached thereafter.
+// Hash返回区块b头部的keccak256哈希值。
+// 哈希在第一次调用时被计算并在之后缓存。
 func (b *Block) Hash() common.Hash {
 	if hash := b.hash.Load(); hash != nil {
 		return hash.(common.Hash)

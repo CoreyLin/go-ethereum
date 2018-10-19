@@ -30,6 +30,7 @@ var (
 	databaseVerisionKey = []byte("DatabaseVersion")
 
 	// headHeaderKey tracks the latest know header's hash.
+	// headHeaderKey跟踪最新的已知区块头的哈希值。
 	headHeaderKey = []byte("LastHeader")
 
 	// headBlockKey tracks the latest know full block's hash.

@@ -17,12 +17,14 @@
 package rawdb
 
 // DatabaseReader wraps the Has and Get method of a backing data store.
+// DatabaseReader包装后台数据存储的Has和Get方法。
 type DatabaseReader interface {
 	Has(key []byte) (bool, error)
 	Get(key []byte) ([]byte, error)
 }
 
 // DatabaseWriter wraps the Put method of a backing data store.
+// DatabaseWriter包装后台数据存储的Put方法。
 type DatabaseWriter interface {
 	Put(key []byte, value []byte) error
 }

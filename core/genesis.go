@@ -134,11 +134,13 @@ func (h storageJSON) MarshalText() ([]byte, error) {
 
 // GenesisMismatchError is raised when trying to overwrite an existing
 // genesis block with an incompatible one.
+// 尝试用一个不兼容的区块覆盖现有的genesis区块时会引发GenesisMismatchError。
 type GenesisMismatchError struct {
 	Stored, New common.Hash
 }
 
 func (e *GenesisMismatchError) Error() string {
+	// 数据库已包含不兼容的创世区块
 	return fmt.Sprintf("database already contains an incompatible genesis block (have %x, new %x)", e.Stored[:8], e.New[:8])
 }
 
@@ -183,37 +185,48 @@ func SetupGenesisBlock(db ethdb.Database, genesis *Genesis) (*params.ChainConfig
 			// 写入自定义的创世区块
 			log.Info("Writing custom genesis block")
 		}
+		// Commit将创世规范的区块和状态写入数据库。
 		block, err := genesis.Commit(db)
 		return genesis.Config, block.Hash(), err
 	}
 
 	// Check whether the genesis block is already written.
+	// 检查是否已经写入了创世区块。
 	if genesis != nil {
+		// ToBlock创建genesis区块并将genesis规范的状态写入给定的数据库（如果为nil则将其丢弃）。
 		hash := genesis.ToBlock(nil).Hash()
 		if hash != stored {
+			// 尝试用一个不兼容的区块覆盖现有的genesis区块时会引发GenesisMismatchError。
 			return genesis.Config, hash, &GenesisMismatchError{stored, hash}
 		}
 	}
 
 	// Get the existing chain configuration.
+	// 获取现有的链配置。TODO Corey: 注释不对，需要修改
 	newcfg := genesis.configOrDefault(stored)
 	storedcfg := rawdb.ReadChainConfig(db, stored)
 	if storedcfg == nil {
+		// 找到没有链配置的genesis区块
 		log.Warn("Found genesis block without chain config")
+		// 将链配置设置写入数据库。
 		rawdb.WriteChainConfig(db, stored, newcfg)
 		return newcfg, stored, nil
 	}
 	// Special case: don't change the existing config of a non-mainnet chain if no new
 	// config is supplied. These chains would get AllProtocolChanges (and a compat error)
 	// if we just continued here.
+	// 特殊情况：如果没有提供新配置，请不要更改非主链的现有配置。如果我们继续，这些链将获得AllProtocolChanges（和compat错误）。
 	if genesis == nil && stored != params.MainnetGenesisHash {
 		return storedcfg, stored, nil
 	}
 
 	// Check config compatibility and write the config. Compatibility errors
 	// are returned to the caller unless we're already at block zero.
+	// 检查配置兼容性并写入配置。兼容性错误将返回给调用者，除非我们已经处于区块0。
+	// 此处获取了区块链上头部区块（最新区块）的区块头编号
 	height := rawdb.ReadHeaderNumber(db, rawdb.ReadHeadHeaderHash(db))
 	if height == nil {
+		// 丢失头部区块区块头哈希的区块号
 		return newcfg, stored, fmt.Errorf("missing block number for head header hash")
 	}
 	compatErr := storedcfg.CheckCompatible(newcfg, *height)
@@ -227,12 +240,16 @@ func SetupGenesisBlock(db ethdb.Database, genesis *Genesis) (*params.ChainConfig
 func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 	switch {
 	case g != nil:
+		// 如果g不为nil，直接返回它的*params.ChainConfig
 		return g.Config
 	case ghash == params.MainnetGenesisHash:
+		// 如果g为nil，并且ghash等于主网创世区块哈希，那么返回主网链配置
 		return params.MainnetChainConfig
 	case ghash == params.TestnetGenesisHash:
+		// 如果g为nil，并且ghash等于testnet创世区块哈希，那么返回testnet链配置
 		return params.TestnetChainConfig
 	default:
+		// 默认返回由以太坊核心开发人员引入和接受到Ethash共识的每个协议变更（EIP）
 		return params.AllEthashProtocolChanges
 	}
 }
@@ -277,6 +294,7 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	if g.Difficulty == nil {
 		head.Difficulty = params.GenesisDifficulty
 	}
+	// Commit将状态写入底层的内存中trie数据库。
 	statedb.Commit(false)
 	statedb.Database().TrieDB().Commit(root, true)
 
@@ -285,8 +303,8 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 
 // Commit writes the block and state of a genesis specification to the database.
 // The block is committed as the canonical head block.
-// Commit将创世规范的块和状态写入数据库。
-// 该块作为规范的头块提交。
+// Commit将创世规范的区块和状态写入数据库。
+// 该区块作为规范的头块提交。
 func (g *Genesis) Commit(db ethdb.Database) (*types.Block, error) {
 	block := g.ToBlock(db)
 	if block.Number().Sign() != 0 {

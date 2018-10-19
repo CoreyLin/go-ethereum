@@ -50,6 +50,8 @@ type Hash [HashLength]byte
 
 // BytesToHash sets b to hash.
 // If b is larger than len(h), b will be cropped from the left.
+// BytesToHash将b设置为哈希。
+// 如果b大于len（h），则b将从左侧裁剪。
 func BytesToHash(b []byte) Hash {
 	var h Hash
 	h.SetBytes(b)
@@ -62,6 +64,8 @@ func BigToHash(b *big.Int) Hash { return BytesToHash(b.Bytes()) }
 
 // HexToHash sets byte representation of s to hash.
 // If b is larger than len(h), b will be cropped from the left.
+// HexToHash将s的字节表示设置为hash。
+// 如果b大于len（h），则b将从左侧裁剪。
 func HexToHash(s string) Hash { return BytesToHash(FromHex(s)) }
 
 // Bytes gets the byte representation of the underlying hash.

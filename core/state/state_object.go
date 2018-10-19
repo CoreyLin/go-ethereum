@@ -81,6 +81,7 @@ type stateObject struct {
 
 	// Write caches.
 	trie Trie // storage trie, which becomes non-nil on first access
+	// 合约字节码，在加载代码时设置
 	code Code // contract bytecode, which gets set when code is loaded
 
 	originStorage Storage // Storage cache of original entries to dedup rewrites
@@ -91,6 +92,7 @@ type stateObject struct {
 	// during the "update" phase of the state transition.
 	// 缓存标志。
 	// 当一个对象被标记为自杀时，它将在状态转换的“更新”阶段从trie中删除。
+	// 如果代码被更新了则为true
 	dirtyCode bool // true if the code was updated
 	suicided  bool
 	deleted   bool
@@ -104,9 +106,11 @@ func (s *stateObject) empty() bool {
 
 // Account is the Ethereum consensus representation of accounts.
 // These objects are stored in the main account trie.
+// Account是帐户的以太坊共识表示。这些对象存储在主帐户trie中。
 type Account struct {
 	Nonce    uint64
 	Balance  *big.Int
+	// 存储trie的merkle root
 	Root     common.Hash // merkle root of the storage trie
 	CodeHash []byte
 }
@@ -256,6 +260,8 @@ func (self *stateObject) updateRoot(db Database) {
 
 // CommitTrie the storage trie of the object to db.
 // This updates the trie root.
+// CommitTrie对象的存储trie到db。
+// 这会更新trie root。
 func (self *stateObject) CommitTrie(db Database) error {
 	self.updateTrie(db)
 	if self.dbErr != nil {
