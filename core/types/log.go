@@ -57,8 +57,8 @@ type Log struct {
 	// hash of the block in which the transaction was included
 	// 包含交易的区块的哈希值
 	BlockHash common.Hash `json:"blockHash"`
-	// index of the log in the receipt
-	// 收据中的日志索引
+	// index of the log in the block
+	// 区块中的日志索引
 	Index uint `json:"logIndex" gencodec:"required"`
 
 	// The Removed field is true if this log was reverted due to a chain reorganisation.

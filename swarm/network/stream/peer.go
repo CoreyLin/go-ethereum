@@ -18,6 +18,7 @@ package stream
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -45,6 +46,10 @@ func newNotFoundError(t string, s Stream) *notFoundError {
 func (e *notFoundError) Error() string {
 	return fmt.Sprintf("%s not found for stream %q", e.t, e.s)
 }
+
+// ErrMaxPeerServers will be returned if peer server limit is reached.
+// It will be sent in the SubscribeErrorMsg.
+var ErrMaxPeerServers = errors.New("max peer servers")
 
 // Peer is the Peer extension for the streaming protocol
 type Peer struct {
@@ -161,11 +166,11 @@ func (p *Peer) SendOfferedHashes(s *server, f, t uint64) error {
 		"send.offered.hashes")
 	defer sp.Finish()
 
-	hashes, from, to, proof, err := s.SetNextBatch(f, t)
+	hashes, from, to, proof, err := s.setNextBatch(f, t)
 	if err != nil {
 		return err
 	}
-	// true only when quiting
+	// true only when quitting
 	if len(hashes) == 0 {
 		return nil
 	}
@@ -204,10 +209,20 @@ func (p *Peer) setServer(s Stream, o Server, priority uint8) (*server, error) {
 	if p.servers[s] != nil {
 		return nil, fmt.Errorf("server %s already registered", s)
 	}
+
+	if p.streamer.maxPeerServers > 0 && len(p.servers) >= p.streamer.maxPeerServers {
+		return nil, ErrMaxPeerServers
+	}
+
+	sessionIndex, err := o.SessionIndex()
+	if err != nil {
+		return nil, err
+	}
 	os := &server{
-		Server:   o,
-		stream:   s,
-		priority: priority,
+		Server:       o,
+		stream:       s,
+		priority:     priority,
+		sessionIndex: sessionIndex,
 	}
 	p.servers[s] = os
 	return os, nil
@@ -346,6 +361,7 @@ func (p *Peer) removeClient(s Stream) error {
 		return newNotFoundError("client", s)
 	}
 	client.close()
+	delete(p.clients, s)
 	return nil
 }
 

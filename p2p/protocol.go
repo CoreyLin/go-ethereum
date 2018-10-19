@@ -19,7 +19,8 @@ package p2p
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/p2p/discover"
+	"github.com/ethereum/go-ethereum/p2p/enode"
+	"github.com/ethereum/go-ethereum/p2p/enr"
 )
 
 // Protocol represents a P2P subprotocol implementation.
@@ -61,7 +62,11 @@ type Protocol struct {
 	// but returns nil, it is assumed that the protocol handshake is still running.
 	// 是一个用于获取关于某个对等节点的协议特定的元数据的可选的帮助方法。如果一个信息获取函数被设置，但是返回nil，
 	// 那么我们就认为协议握手还在进行中。
-	PeerInfo func(id discover.NodeID) interface{}
+	PeerInfo func(id enode.ID) interface{}
+
+	// Attributes contains protocol specific information for the node record.
+	// Attributes包含节点记录的协议特定信息。
+	Attributes []enr.Entry
 }
 
 func (p Protocol) cap() Cap {
@@ -72,10 +77,6 @@ func (p Protocol) cap() Cap {
 type Cap struct {
 	Name    string
 	Version uint
-}
-
-func (cap Cap) RlpData() interface{} {
-	return []interface{}{cap.Name, cap.Version}
 }
 
 func (cap Cap) String() string {
@@ -89,3 +90,5 @@ func (cs capsByNameAndVersion) Swap(i, j int) { cs[i], cs[j] = cs[j], cs[i] }
 func (cs capsByNameAndVersion) Less(i, j int) bool {
 	return cs[i].Name < cs[j].Name || (cs[i].Name == cs[j].Name && cs[i].Version < cs[j].Version)
 }
+
+func (capsByNameAndVersion) ENRKey() string { return "cap" }
