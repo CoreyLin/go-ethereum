@@ -37,27 +37,35 @@ import (
 )
 
 // IndexerConfig includes a set of configs for chain indexers.
+// IndexerConfig包含一组链式索引器配置。
 type IndexerConfig struct {
 	// The block frequency for creating CHTs.
+	// 用于创建CHT的区块频率。
 	ChtSize uint64
 
 	// A special auxiliary field represents client's chtsize for server config, otherwise represents server's chtsize.
+	// 一个特殊的辅助字段表示客户端的服务器配置的chtsize，否则表示服务器的chtsize。
 	PairChtSize uint64
 
 	// The number of confirmations needed to generate/accept a canonical hash help trie.
+	// 生成/接受一个规范哈希所需的确认数量有助于trie。
 	ChtConfirms uint64
 
 	// The block frequency for creating new bloom bits.
+	// 用于创建新布隆位的区块频率。
 	BloomSize uint64
 
 	// The number of confirmation needed before a bloom section is considered probably final and its rotated bits
 	// are calculated.
+	// 在考虑布隆部分之前所需的确认次数可能是最终的并且计算其旋转的位数。
 	BloomConfirms uint64
 
 	// The block frequency for creating BloomTrie.
+	// 用于创建BloomTrie的区块频率。
 	BloomTrieSize uint64
 
 	// The number of confirmations needed to generate/accept a bloom trie.
+	// 生成/接受布隆trie所需的确认次数。
 	BloomTrieConfirms uint64
 }
 
@@ -73,6 +81,7 @@ var (
 		BloomTrieConfirms: params.HelperTrieProcessConfirmations,
 	}
 	// DefaultClientIndexerConfig wraps a set of configs as a default indexer config for client side.
+	// DefaultClientIndexerConfig将一组配置包装为客户端的默认索引器配置。
 	DefaultClientIndexerConfig = &IndexerConfig{
 		ChtSize:           params.CHTFrequencyClient,
 		PairChtSize:       params.CHTFrequencyServer,
@@ -153,6 +162,7 @@ type ChtIndexerBackend struct {
 }
 
 // NewChtIndexer creates a Cht chain indexer
+// NewChtIndexer创建一个Cht链索引器
 func NewChtIndexer(db ethdb.Database, odr OdrBackend, size, confirms uint64) *core.ChainIndexer {
 	trieTable := ethdb.NewTable(db, ChtTablePrefix)
 	backend := &ChtIndexerBackend{
@@ -275,6 +285,7 @@ type BloomTrieIndexerBackend struct {
 }
 
 // NewBloomTrieIndexer creates a BloomTrie chain indexer
+// NewBloomTrieIndexer创建一个BloomTrie链索引器
 func NewBloomTrieIndexer(db ethdb.Database, odr OdrBackend, parentSize, size uint64) *core.ChainIndexer {
 	trieTable := ethdb.NewTable(db, BloomTrieTablePrefix)
 	backend := &BloomTrieIndexerBackend{

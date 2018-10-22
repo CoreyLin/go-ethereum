@@ -97,6 +97,7 @@ type BloomIndexer struct {
 
 // NewBloomIndexer returns a chain indexer that generates bloom bits data for the
 // canonical chain for fast logs filtering.
+// NewBloomIndexer返回一个链索引器，它为规范链生成bloom位数据以进行快速日志过滤。
 func NewBloomIndexer(db ethdb.Database, size, confirms uint64) *core.ChainIndexer {
 	backend := &BloomIndexer{
 		db:   db,

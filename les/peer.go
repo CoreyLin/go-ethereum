@@ -49,11 +49,15 @@ const (
 )
 
 type peer struct {
+	// Peer表示连接的远程节点。
 	*p2p.Peer
 
+	// MsgReadWriter提供编码消息的读写。
 	rw p2p.MsgReadWriter
 
+	// 协商的协议版本
 	version int    // Protocol version negotiated
+	// 正在启用的网络ID
 	network uint64 // Network ID being on
 
 	announceType, requestAnnounceType uint64
@@ -70,7 +74,9 @@ type peer struct {
 	hasBlock       func(common.Hash, uint64, bool) bool
 	responseErrors int
 
+	// 如果对等方仅为服务器，则为nil
 	fcClient       *flowcontrol.ClientNode // nil if the peer is server only
+	// 如果对等方只是客户端则为nil
 	fcServer       *flowcontrol.ServerNode // nil if the peer is client only
 	fcServerParams *flowcontrol.ServerParams
 	fcCosts        requestCostTable
@@ -507,6 +513,7 @@ type peerSetNotify interface {
 
 // peerSet represents the collection of active peers currently participating in
 // the Light Ethereum sub-protocol.
+// peerSet表示当前参与Light Ethereum子协议的活动对等方的集合。
 type peerSet struct {
 	peers      map[string]*peer
 	lock       sync.RWMutex
@@ -515,6 +522,7 @@ type peerSet struct {
 }
 
 // newPeerSet creates a new peer set to track the active participants.
+// newPeerSet创建一个新的对等集来跟踪活动参与者。
 func newPeerSet() *peerSet {
 	return &peerSet{
 		peers: make(map[string]*peer),

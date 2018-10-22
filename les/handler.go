@@ -113,17 +113,21 @@ type ProtocolManager struct {
 	eventMux *event.TypeMux
 
 	// channels for fetcher, syncer, txsyncLoop
+	// fetcher，syncer，txsyncLoop的通道
 	newPeerCh   chan *peer
 	quitSync    chan struct{}
 	noMorePeers chan struct{}
 
 	// wait group is used for graceful shutdowns during downloading
 	// and processing
+	// wait group用于在下载和处理期间进行正常关闭
 	wg *sync.WaitGroup
 }
 
 // NewProtocolManager returns a new ethereum sub protocol manager. The Ethereum sub protocol manages peers capable
 // with the ethereum network.
+// NewProtocolManager返回一个新的以太坊子协议管理器。以太坊子协议管理能够使用以太坊网络的对等体。
+// TODO Corey 此函数的参数太多，需要优化
 func NewProtocolManager(chainConfig *params.ChainConfig, indexerConfig *light.IndexerConfig, lightSync bool, networkId uint64, mux *event.TypeMux, engine consensus.Engine, peers *peerSet, blockchain BlockChain, txpool txPool, chainDb ethdb.Database, odr *LesOdr, txrelay *LesTxRelay, serverPool *serverPool, quitSync chan struct{}, wg *sync.WaitGroup) (*ProtocolManager, error) {
 	// Create the protocol manager with the base fields
 	manager := &ProtocolManager{

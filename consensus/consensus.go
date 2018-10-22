@@ -50,6 +50,7 @@ type ChainReader interface {
 }
 
 // Engine is an algorithm agnostic consensus engine.
+// Engine是一种算法不可知的共识引擎。
 type Engine interface {
 	// Author retrieves the Ethereum address of the account that minted the given
 	// block, which may be different from the header's coinbase if a consensus

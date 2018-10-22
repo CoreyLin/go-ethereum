@@ -31,6 +31,7 @@ import (
 )
 
 // lesCommons contains fields needed by both server and client.
+// lesCommons包含服务器和客户端所需的字段。
 type lesCommons struct {
 	config                       *eth.Config
 	iConfig                      *light.IndexerConfig

@@ -49,6 +49,7 @@ const (
 
 var (
 	// Git SHA1 commit hash of the release (set via linker flags)
+	// Git SHA1提交发布的哈希值（通过链接器标志设置）
 	gitCommit = ""
 	// The app that holds all commands and flags.
 	//
@@ -172,6 +173,7 @@ func init() {
 	// Initialize the CLI app and start Geth
 	// 初始化CLI程序并且启动Geth
 	// 如果不指定任何子命令就直接运行geth函数
+	// Action表示未指定子命令时执行的操作
 	app.Action = geth
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2013-2018 The go-ethereum Authors"
@@ -262,7 +264,7 @@ func main() {
 // geth is the main entry point into the system if no special subcommand is ran.
 // It creates a default node based on the command line arguments and runs it in
 // blocking mode, waiting for it to be shut down.
-// 如果不指定特别的子命令，那么geth函数就是系统的主入口。它基于命令行参数创建了一个默认的节点，并且以blocking模式运行这个节点，等待节点被关闭
+// 如果不指定特别的子命令，那么geth函数就是系统的主入口。它基于命令行参数创建了一个默认的节点，并且以阻塞模式运行这个节点，等待节点被关闭
 func geth(ctx *cli.Context) error {
 	// 如果除了程序路径之外，还有其他的参数，那么就直接返回error
 	if args := ctx.Args(); len(args) > 0 {
@@ -277,6 +279,7 @@ func geth(ctx *cli.Context) error {
 // startNode boots up the system node and all registered protocols, after which
 // it unlocks any requested accounts, and starts the RPC/IPC interfaces and the
 // miner.
+// startNode启动系统节点和所有已注册的协议，然后解锁所有请求的帐户，并启动RPC / IPC接口和矿工。
 func startNode(ctx *cli.Context, stack *node.Node) {
 	debug.Memsize.Add("node", stack)
 

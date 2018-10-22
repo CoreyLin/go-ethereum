@@ -59,11 +59,13 @@ type LesServer interface {
 }
 
 // Ethereum implements the Ethereum full node service.
+// Ethereum实现了以太坊全节点服务。
 type Ethereum struct {
 	config      *Config
 	chainConfig *params.ChainConfig
 
 	// Channel for shutting down the service
+	// 关闭服务的通道
 	shutdownChan chan bool // Channel for shutting down the Ethereum
 
 	// Handlers
@@ -79,7 +81,9 @@ type Ethereum struct {
 	engine         consensus.Engine
 	accountManager *accounts.Manager
 
+	// 接收布隆数据检索请求的通道
 	bloomRequests chan chan *bloombits.Retrieval // Channel receiving bloom data retrieval requests
+	// 在区块导入期间运行的布隆索引器
 	bloomIndexer  *core.ChainIndexer             // Bloom indexer operating during block imports
 
 	APIBackend *EthAPIBackend
@@ -101,19 +105,24 @@ func (s *Ethereum) AddLesServer(ls LesServer) {
 
 // New creates a new Ethereum object (including the
 // initialisation of the common Ethereum object)
+// New创建一个新的以太坊对象（包括一般的以太坊对象的初始化）
 func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	// Ensure configuration values are compatible and sane
+	// 确保配置值兼容且清晰
 	if config.SyncMode == downloader.LightSync {
+		// 无法在轻型同步模式下运行eth.Ethereum，请使用les.LightEthereum
 		return nil, errors.New("can't run eth.Ethereum in light sync mode, use les.LightEthereum")
 	}
 	if !config.SyncMode.IsValid() {
 		return nil, fmt.Errorf("invalid sync mode %d", config.SyncMode)
 	}
 	if config.MinerGasPrice == nil || config.MinerGasPrice.Cmp(common.Big0) <= 0 {
+		// 如果config.MinerGasPrice为nil或者小于0，把gas price设置为默认值1e9 wei
 		log.Warn("Sanitizing invalid miner gas price", "provided", config.MinerGasPrice, "updated", DefaultConfig.MinerGasPrice)
 		config.MinerGasPrice = new(big.Int).Set(DefaultConfig.MinerGasPrice)
 	}
 	// Assemble the Ethereum object
+	// 组装以太坊对象
 	chainDb, err := CreateDB(ctx, config, "chaindata")
 	if err != nil {
 		return nil, err
@@ -161,6 +170,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		return nil, err
 	}
 	// Rewind the chain in case of an incompatible config upgrade.
+	// 如果配置升级不兼容，请回滚链。
 	if compat, ok := genesisErr.(*params.ConfigCompatError); ok {
 		log.Warn("Rewinding chain to upgrade configuration", "err", compat)
 		eth.blockchain.SetHead(compat.RewindTo)
@@ -222,6 +232,7 @@ func CreateDB(ctx *node.ServiceContext, config *Config, name string) (ethdb.Data
 }
 
 // CreateConsensusEngine creates the required type of consensus engine instance for an Ethereum service
+// CreateConsensusEngine为以太坊服务创建所需类型的共识引擎实例
 func CreateConsensusEngine(ctx *node.ServiceContext, chainConfig *params.ChainConfig, config *ethash.Config, notify []string, noverify bool, db ethdb.Database) consensus.Engine {
 	// If proof-of-authority is requested, set it up
 	if chainConfig.Clique != nil {
@@ -367,6 +378,7 @@ func (s *Ethereum) isLocalBlock(block *types.Block) bool {
 // shouldPreserve checks whether we should preserve the given block
 // during the chain reorg depending on whether the author of block
 // is a local account.
+// shouldPreserve检查我们是否应该在链重组期间保留给定的区块，具体取决于区块的作者是否是本地帐户。
 func (s *Ethereum) shouldPreserve(block *types.Block) bool {
 	// The reason we need to disable the self-reorg preserving for clique
 	// is it can be probable to introduce a deadlock.

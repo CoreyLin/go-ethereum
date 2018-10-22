@@ -49,6 +49,7 @@ type ChainIndexerBackend interface {
 }
 
 // ChainIndexerChain interface is used for connecting the indexer to a blockchain
+// ChainIndexerChain接口用于将索引器连接到区块链
 type ChainIndexerChain interface {
 	// CurrentHeader retrieves the latest locally known header.
 	CurrentHeader() *types.Header
@@ -66,6 +67,10 @@ type ChainIndexerChain interface {
 // section indexer. These child indexers receive new head notifications only
 // after an entire section has been finished or in case of rollbacks that might
 // affect already finished sections.
+// ChainIndexer为规范链（如BlooomBits和CHT结构）的同等大小的部分执行后处理作业。
+// ChainIndexer通过在goroutine中启动ChainHeadEventLoop，通过事件系统连接到区块链。
+//
+// 可以添加使用父节索引器的输出的其他子ChainIndexers。这些子索引器仅在完成整个部分之后或者在可能影响已完成部分的回滚的情况下才会收到新的头部通知。
 type ChainIndexer struct {
 	chainDb  ethdb.Database      // Chain database to index the data from
 	indexDb  ethdb.Database      // Prefixed table-view of the db to write index metadata into
@@ -141,6 +146,7 @@ func (c *ChainIndexer) AddCheckpoint(section uint64, shead common.Hash) {
 // Start creates a goroutine to feed chain head events into the indexer for
 // cascading background processing. Children do not need to be started, they
 // are notified about new events by their parents.
+// 开始创建一个goroutine，将链头事件提供给索引器以进行级联后台处理。孩子不需要开始，他们会被父母通知新事件。
 func (c *ChainIndexer) Start(chain ChainIndexerChain) {
 	events := make(chan ChainHeadEvent, 10)
 	sub := chain.SubscribeChainHeadEvent(events)
@@ -422,6 +428,7 @@ func (c *ChainIndexer) Sections() (uint64, uint64, common.Hash) {
 }
 
 // AddChildIndexer adds a child ChainIndexer that can use the output of this one
+// AddChildIndexer添加了一个可以使用此输出的子ChainIndexer
 func (c *ChainIndexer) AddChildIndexer(indexer *ChainIndexer) {
 	c.lock.Lock()
 	defer c.lock.Unlock()

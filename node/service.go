@@ -59,6 +59,7 @@ func (ctx *ServiceContext) OpenDatabase(name string, cache int, handles int) (et
 // ResolvePath resolves a user path into the data directory if that was relative
 // and if the user actually uses persistent storage. It will return an empty string
 // for emphemeral storage and the user's own input for absolute paths.
+// 如果用户路径是相对的并且用户实际使用持久存储，则ResolvePath会将用户路径解析为数据目录。它将返回一个空字符串以进行短暂存储，并返回用户自己的绝对路径输入。
 func (ctx *ServiceContext) ResolvePath(path string) string {
 	return ctx.config.ResolvePath(path)
 }

@@ -139,8 +139,11 @@ type Config struct {
 	DocRoot string `toml:"-"`
 
 	// Type of the EWASM interpreter ("" for detault)
+	// EWASM解释器的类型（默认是""）
+	// TODO Corey: for detault改为for default
 	EWASMInterpreter string
 	// Type of the EVM interpreter ("" for default)
+	// EVM解释器的类型（默认为“”）
 	EVMInterpreter string
 }
 

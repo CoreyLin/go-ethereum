@@ -30,6 +30,7 @@ import (
 )
 
 // Node represents a host on the network.
+// 节点Node表示网络上的主机。
 type Node struct {
 	r  enr.Record
 	id ID
@@ -143,6 +144,7 @@ func (n *Node) UnmarshalText(text []byte) error {
 }
 
 // ID is a unique identifier for each node.
+// ID是每个节点的唯一标识符。
 type ID [32]byte
 
 // Bytes returns a byte slice representation of the ID

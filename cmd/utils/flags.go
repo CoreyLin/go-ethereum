@@ -199,6 +199,7 @@ var (
 		Usage: "Reduce key-derivation RAM & CPU usage at some expense of KDF strength",
 	}
 	// Dashboard settings
+	// 仪表盘设置
 	DashboardEnabledFlag = cli.BoolFlag{
 		Name:  metrics.DashboardEnabledFlag,
 		Usage: "Enable the dashboard",
@@ -1483,12 +1484,15 @@ func RegisterEthService(stack *node.Node, cfg *eth.Config) {
 	var err error
 	if cfg.SyncMode == downloader.LightSync {
 		err = stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
+			// 创建一个以太坊轻客户端
 			return les.New(ctx, cfg)
 		})
 	} else {
 		err = stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
+			// New创建一个新的以太坊对象（包括一般的以太坊对象的初始化）
 			fullNode, err := eth.New(ctx, cfg)
 			if fullNode != nil && cfg.LightServ > 0 {
+				// TODO Corey 为什么不用判断les.NewLesServer返回的error？
 				ls, _ := les.NewLesServer(fullNode, cfg)
 				fullNode.AddLesServer(ls)
 			}
@@ -1496,11 +1500,13 @@ func RegisterEthService(stack *node.Node, cfg *eth.Config) {
 		})
 	}
 	if err != nil {
+		// 无法注册以太坊服务
 		Fatalf("Failed to register the Ethereum service: %v", err)
 	}
 }
 
 // RegisterDashboardService adds a dashboard to the stack.
+// RegisterDashboardService将一个仪表板添加到堆栈。
 func RegisterDashboardService(stack *node.Node, cfg *dashboard.Config, commit string) {
 	stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		return dashboard.New(cfg, commit, ctx.ResolvePath("logs")), nil
@@ -1508,6 +1514,7 @@ func RegisterDashboardService(stack *node.Node, cfg *dashboard.Config, commit st
 }
 
 // RegisterShhService configures Whisper and adds it to the given node.
+// RegisterShhService配置Whisper并将其添加到给定节点。
 func RegisterShhService(stack *node.Node, cfg *whisper.Config) {
 	if err := stack.Register(func(n *node.ServiceContext) (node.Service, error) {
 		return whisper.New(cfg), nil
@@ -1518,6 +1525,7 @@ func RegisterShhService(stack *node.Node, cfg *whisper.Config) {
 
 // RegisterEthStatsService configures the Ethereum Stats daemon and adds it to
 // the given node.
+// RegisterEthStatsService配置以太坊统计守护程序并将其添加到给定节点。
 func RegisterEthStatsService(stack *node.Node, url string) {
 	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		// Retrieve both eth and les services

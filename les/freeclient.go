@@ -43,6 +43,12 @@ import (
 // keys for that purpose would not make sense when being known has a negative
 // value for the client. Currently the LES protocol manager uses IP addresses
 // (without port address) to identify clients.
+// freeClientPool实现了一个客户端数据库，它限制了每个客户端的连接时间，并管理接受/拒绝传入连接，甚至踢出一些连接的客户端。
+// 池计算每个已知客户端的最近使用时间（在客户端连接时线性增加的值，在未连接时以指数方式减少）。最近使用较低的客户端是首选，未知节点具有最高优先级。
+// 已经连接的节点会受到一些偏好，以避免接受并立即踢出客户端。
+//
+// 注意：池可以使用任何字符串进行客户端识别。当知道客户端具有负值时，为此目的使用签名密钥是没有意义的。
+// 目前，LES协议管理器使用IP地址（没有端口地址）来识别客户端。
 type freeClientPool struct {
 	db     ethdb.Database
 	lock   sync.Mutex

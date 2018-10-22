@@ -24,6 +24,7 @@ import (
 )
 
 // AbsTime represents absolute monotonic time.
+// AbsTime代表绝对单调时间。
 type AbsTime time.Duration
 
 // Now returns the current absolute monotonic time.

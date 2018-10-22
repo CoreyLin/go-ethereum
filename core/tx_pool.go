@@ -102,6 +102,7 @@ var (
 )
 
 // TxStatus is the current status of a transaction as seen by the pool.
+// TxStatus是交易池所见的交易的当前状态。
 type TxStatus uint
 
 const (
@@ -228,6 +229,7 @@ type TxPool struct {
 
 // NewTxPool creates a new transaction pool to gather, sort and filter inbound
 // transactions from the network.
+// NewTxPool创建一个新的交易池，用于从网络收集，排序和过滤入站交易。
 func NewTxPool(config TxPoolConfig, chainconfig *params.ChainConfig, chain blockChain) *TxPool {
 	// Sanitize the input to ensure no vulnerable gas prices are set
 	config = (&config).sanitize()

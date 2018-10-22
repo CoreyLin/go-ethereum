@@ -106,6 +106,7 @@ type RecordKeyNames struct {
 }
 
 // A Logger writes key/value pairs to a Handler
+// 一个Logger将键/值对写入Handler
 type Logger interface {
 	// New returns a new Logger that has this logger's context plus the given context
 	New(ctx ...interface{}) Logger

@@ -229,6 +229,7 @@ func SetupGenesisBlock(db ethdb.Database, genesis *Genesis) (*params.ChainConfig
 		// 丢失头部区块区块头哈希的区块号
 		return newcfg, stored, fmt.Errorf("missing block number for head header hash")
 	}
+	// CheckCompatible检查是否已使用不匹配的链配置导入调度的fork转换。
 	compatErr := storedcfg.CheckCompatible(newcfg, *height)
 	if compatErr != nil && *height != 0 && compatErr.RewindTo != 0 {
 		return newcfg, stored, compatErr

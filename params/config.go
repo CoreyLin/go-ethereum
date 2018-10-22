@@ -288,6 +288,7 @@ func (c *ChainConfig) GasTable(num *big.Int) GasTable {
 
 // CheckCompatible checks whether scheduled fork transitions have been imported
 // with a mismatching chain configuration.
+// CheckCompatible检查是否已使用不匹配的链配置导入调度的fork转换。
 func (c *ChainConfig) CheckCompatible(newcfg *ChainConfig, height uint64) *ConfigCompatError {
 	bhead := new(big.Int).SetUint64(height)
 
@@ -364,11 +365,14 @@ func configNumEqual(x, y *big.Int) bool {
 
 // ConfigCompatError is raised if the locally-stored blockchain is initialised with a
 // ChainConfig that would alter the past.
+// 如果本地存储的区块链使用可改变过去的ChainConfig进行初始化，则会引发ConfigCompatError。
 type ConfigCompatError struct {
 	What string
 	// block numbers of the stored and new configurations
+	// 已有的和新的配置的区块号
 	StoredConfig, NewConfig *big.Int
 	// the block number to which the local chain must be rewound to correct the error
+	// 本地链必须回滚到的区块编号以更正错误
 	RewindTo uint64
 }
 

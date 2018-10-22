@@ -80,6 +80,7 @@ type client struct {
 }
 
 // New creates a new dashboard instance with the given configuration.
+// New使用给定配置创建新的仪表板实例。
 func New(config *Config, commit string, logdir string) *Dashboard {
 	now := time.Now()
 	versionMeta := ""

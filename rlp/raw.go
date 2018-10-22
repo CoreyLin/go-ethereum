@@ -24,6 +24,7 @@ import (
 // RawValue represents an encoded RLP value and can be used to delay
 // RLP decoding or to precompute an encoding. Note that the decoder does
 // not verify whether the content of RawValues is valid RLP.
+// RawValue表示编码的RLP值，可用于延迟RLP解码或预编译编码。注意，解码器不验证RawValues的内容是否是有效的RLP。
 type RawValue []byte
 
 var rawValueType = reflect.TypeOf(RawValue{})

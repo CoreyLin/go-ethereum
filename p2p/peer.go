@@ -100,6 +100,7 @@ type PeerEvent struct {
 }
 
 // Peer represents a connected remote node.
+// Peer表示连接的远程节点。
 type Peer struct {
 	rw      *conn
 	running map[string]*protoRW
@@ -112,6 +113,7 @@ type Peer struct {
 	disc     chan DiscReason
 
 	// events receives message send / receive events if set
+	// events接收消息发送/接收事件（如果已设置）
 	events *event.Feed
 }
 
@@ -384,9 +386,13 @@ func (p *Peer) getProto(code uint64) (*protoRW, error) {
 
 type protoRW struct {
 	Protocol
+	// 接收读取消息
 	in     chan Msg        // receives read messages
+	// 当对等方关闭时收到
 	closed <-chan struct{} // receives when peer is shutting down
+	// 写入开始时接收
 	wstart <-chan struct{} // receives when write may start
+	// 用于写入结果
 	werr   chan<- error    // for write results
 	offset uint64
 	w      MsgWriter

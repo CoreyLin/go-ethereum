@@ -39,6 +39,7 @@ type Config struct {
 
 // Oracle recommends gas prices based on the content of recent
 // blocks. Suitable for both light and full clients.
+// Oracle根据最近块的内容推荐gas价格。适合轻型客户端和全客户端。
 type Oracle struct {
 	backend   ethapi.Backend
 	lastHead  common.Hash
@@ -51,6 +52,7 @@ type Oracle struct {
 }
 
 // NewOracle returns a new oracle.
+// NewOracle返回一个新的oracle。
 func NewOracle(backend ethapi.Backend, params Config) *Oracle {
 	blocks := params.Blocks
 	if blocks < 1 {

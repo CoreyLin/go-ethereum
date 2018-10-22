@@ -37,12 +37,17 @@ var errBadChannel = errors.New("event: Subscribe argument does not have sendable
 // Feed仅仅能够被用于一种数据类型。这种数据类型是在第一次发送或者订阅操作发生时确定的。后续的调用如果类型不匹配就会panic
 // 零值准备好使用
 type Feed struct {
+	// 确保init只运行一次
 	once      sync.Once        // ensures that init only runs once
+	// sendLock有一个单元素缓冲区，在保持时为空。它保护sendCases。
 	sendLock  chan struct{}    // sendLock has a one-element buffer and is empty when held.It protects sendCases.
+	// 中断发送
 	removeSub chan interface{} // interrupts Send
+	// 发送使用的活跃选择案例集
 	sendCases caseList         // the active set of select cases used by Send
 
 	// The inbox holds newly subscribed channels until they are added to sendCases.
+	// 收件箱保存新订阅的频道，直到它们被添加到sendCases。
 	mu     sync.Mutex
 	inbox  caseList
 	etype  reflect.Type

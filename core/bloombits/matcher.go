@@ -60,6 +60,10 @@ type partialMatches struct {
 //
 // The contest and error fields are used by the light client to terminate matching
 // early if an error is encountered on some path of the pipeline.
+// Retrieval表示对具有给定数量的获取元素的给定位的检索任务分配的请求，或对此类请求的响应。
+// 它还可以将实际结果集用作交付数据结构。
+//
+// 如果在管道的某个路径上遇到错误，则轻客户端将使用context和error字段来提前终止匹配。
 type Retrieval struct {
 	Bit      uint
 	Sections []uint64

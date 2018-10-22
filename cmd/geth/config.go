@@ -172,6 +172,7 @@ func makeConfigNode(ctx *cli.Context) (*node.Node, gethConfig) {
 }
 
 // enableWhisper returns true in case one of the whisper flags is set.
+// 如果设置了其中一个whisper flag，enableWhisper将返回true。
 func enableWhisper(ctx *cli.Context) bool {
 	for _, flag := range whisperFlags {
 		if ctx.GlobalIsSet(flag.GetName()) {
@@ -181,6 +182,7 @@ func enableWhisper(ctx *cli.Context) bool {
 	return false
 }
 
+// TODO Corey：个人认为此函数不应该取名为makeFullNode，因为其有可能创建的是轻型节点，也有可能创建的是完整节点
 func makeFullNode(ctx *cli.Context) *node.Node {
 	stack, cfg := makeConfigNode(ctx)
 
@@ -190,6 +192,7 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 		utils.RegisterDashboardService(stack, &cfg.Dashboard, gitCommit)
 	}
 	// Whisper must be explicitly enabled by specifying at least 1 whisper flag or in dev mode
+	// 必须通过指定至少1个whisper flag或在开发模式下明确启用Whisper
 	shhEnabled := enableWhisper(ctx)
 	shhAutoEnabled := !ctx.GlobalIsSet(utils.WhisperEnabledFlag.Name) && ctx.GlobalIsSet(utils.DeveloperFlag.Name)
 	if shhEnabled || shhAutoEnabled {
@@ -206,6 +209,7 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	}
 
 	// Add the Ethereum Stats daemon if requested.
+	// 如果需要，添加以太坊统计守护程序。
 	if cfg.Ethstats.URL != "" {
 		utils.RegisterEthStatsService(stack, cfg.Ethstats.URL)
 	}

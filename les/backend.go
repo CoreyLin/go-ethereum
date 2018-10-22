@@ -52,6 +52,7 @@ type LightEthereum struct {
 	relay       *LesTxRelay
 	chainConfig *params.ChainConfig
 	// Channel for shutting down the service
+	// 关闭服务的通道
 	shutdownChan chan bool
 
 	// Handlers
@@ -62,6 +63,7 @@ type LightEthereum struct {
 	reqDist    *requestDistributor
 	retriever  *retrieveManager
 
+	// 接收布隆数据检索请求的通道
 	bloomRequests chan chan *bloombits.Retrieval // Channel receiving bloom data retrieval requests
 	bloomIndexer  *core.ChainIndexer
 
@@ -78,16 +80,20 @@ type LightEthereum struct {
 }
 
 func New(ctx *node.ServiceContext, config *eth.Config) (*LightEthereum, error) {
+	// CreateDB创建链数据库。
 	chainDb, err := eth.CreateDB(ctx, config, "lightchaindata")
 	if err != nil {
 		return nil, err
 	}
+	// SetupGenesisBlock在db中写入或更新genesis区块。
 	chainConfig, genesisHash, genesisErr := core.SetupGenesisBlock(chainDb, config.Genesis)
 	if _, isCompat := genesisErr.(*params.ConfigCompatError); genesisErr != nil && !isCompat {
+		// 如果genesisErr的类型不是ConfigCompatError，直接返回错误
 		return nil, genesisErr
 	}
 	log.Info("Initialised chain configuration", "config", chainConfig)
 
+	// newPeerSet创建一个新的对等集来跟踪活动参与者。
 	peers := newPeerSet()
 	quitSync := make(chan struct{})
 
@@ -120,16 +126,20 @@ func New(ctx *node.ServiceContext, config *eth.Config) (*LightEthereum, error) {
 
 	// Note: NewLightChain adds the trusted checkpoint so it needs an ODR with
 	// indexers already set but not started yet
+	// 注意：NewLightChain添加了受信任的检查点，因此它需要一个已设置但尚未启动的索引器的ODR
 	if leth.blockchain, err = light.NewLightChain(leth.odr, leth.chainConfig, leth.engine); err != nil {
 		return nil, err
 	}
 	// Note: AddChildIndexer starts the update process for the child
+	// 注意：AddChildIndexer启动子链索引器的更新过程
 	leth.bloomIndexer.AddChildIndexer(leth.bloomTrieIndexer)
 	leth.chtIndexer.Start(leth.blockchain)
 	leth.bloomIndexer.Start(leth.blockchain)
 
 	// Rewind the chain in case of an incompatible config upgrade.
+	// 如果配置升级不兼容，请回滚链。
 	if compat, ok := genesisErr.(*params.ConfigCompatError); ok {
+		// 回滚链以升级配置
 		log.Warn("Rewinding chain to upgrade configuration", "err", compat)
 		leth.blockchain.SetHead(compat.RewindTo)
 		rawdb.WriteChainConfig(chainDb, genesisHash, chainConfig)

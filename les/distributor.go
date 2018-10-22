@@ -27,6 +27,7 @@ import (
 // requestDistributor implements a mechanism that distributes requests to
 // suitable peers, obeying flow control rules and prioritizing them in creation
 // order (even when a resend is necessary).
+// requestDistributor实现一种机制，将请求分发给合适的对等体，遵守流控制规则并按创建顺序对它们进行优先级排序（即使需要重新发送）。
 type requestDistributor struct {
 	reqQueue         *list.List
 	lastReqOrder     uint64
@@ -67,6 +68,7 @@ type distReq struct {
 }
 
 // newRequestDistributor creates a new request distributor
+// newRequestDistributor创建一个新的请求分发器
 func newRequestDistributor(peers *peerSet, stopChn chan struct{}) *requestDistributor {
 	d := &requestDistributor{
 		reqQueue: list.New(),

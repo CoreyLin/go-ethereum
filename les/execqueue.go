@@ -20,6 +20,7 @@ import "sync"
 
 // execQueue implements a queue that executes function calls in a single thread,
 // in the same order as they have been queued.
+// execQueue实现一个队列，该队列在单个线程中执行函数调用，其顺序与排队的顺序相同。
 type execQueue struct {
 	mu        sync.Mutex
 	cond      *sync.Cond

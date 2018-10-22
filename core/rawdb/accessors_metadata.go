@@ -26,6 +26,7 @@ import (
 )
 
 // ReadDatabaseVersion retrieves the version number of the database.
+// ReadDatabaseVersion检索数据库的版本号。
 func ReadDatabaseVersion(db DatabaseReader) int {
 	var version int
 
@@ -36,6 +37,7 @@ func ReadDatabaseVersion(db DatabaseReader) int {
 }
 
 // WriteDatabaseVersion stores the version number of the database
+// WriteDatabaseVersion存储数据库的版本号
 func WriteDatabaseVersion(db DatabaseWriter, version int) {
 	enc, _ := rlp.EncodeToBytes(version)
 	if err := db.Put(databaseVerisionKey, enc); err != nil {

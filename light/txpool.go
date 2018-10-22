@@ -48,6 +48,8 @@ var txPermanent = uint64(500)
 // in a block (mined) or rolled back. There are no queued transactions since we
 // always receive all locally signed transactions in the same order as they are
 // created.
+// TxPool为轻客户端实现交易池，它跟踪本地创建的交易的状态，检测它们是否包含在区块（已挖掘）或回滚中。
+// 没有排队的交易，因为我们始终按照创建的顺序接收所有本地签名的交易。
 type TxPool struct {
 	config       *params.ChainConfig
 	signer       types.Signer
@@ -86,6 +88,7 @@ type TxRelayBackend interface {
 }
 
 // NewTxPool creates a new light transaction pool
+// NewTxPool创建一个新的轻型交易池
 func NewTxPool(config *params.ChainConfig, chain *LightChain, relay TxRelayBackend) *TxPool {
 	pool := &TxPool{
 		config:      config,

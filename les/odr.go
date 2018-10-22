@@ -26,6 +26,7 @@ import (
 )
 
 // LesOdr implements light.OdrBackend
+// LesOdr实现了light.OdrBackend
 type LesOdr struct {
 	db                                         ethdb.Database
 	indexerConfig                              *light.IndexerConfig
@@ -54,6 +55,7 @@ func (odr *LesOdr) Database() ethdb.Database {
 }
 
 // SetIndexers adds the necessary chain indexers to the ODR backend
+// SetIndexers将必要的链索引器添加到ODR后端
 func (odr *LesOdr) SetIndexers(chtIndexer, bloomTrieIndexer, bloomIndexer *core.ChainIndexer) {
 	odr.chtIndexer = chtIndexer
 	odr.bloomTrieIndexer = bloomTrieIndexer

@@ -112,6 +112,8 @@ type registerReq struct {
 // serverPool implements a pool for storing and selecting newly discovered and already
 // known light server nodes. It received discovered nodes, stores statistics about
 // known nodes and takes care of always having enough good quality servers connected.
+// serverPool实现了一个池，用于存储和选择新发现的和已知的轻型服务器节点。它接收到已发现的节点，
+// 存储有关已知节点的统计信息，并负责始终拥有足够高质量的服务器连接。
 type serverPool struct {
 	db     ethdb.Database
 	dbKey  []byte
@@ -141,6 +143,7 @@ type serverPool struct {
 }
 
 // newServerPool creates a new serverPool instance
+// newServerPool创建一个新的serverPool实例
 func newServerPool(db ethdb.Database, quit chan struct{}, wg *sync.WaitGroup) *serverPool {
 	pool := &serverPool{
 		db:           db,
@@ -614,8 +617,10 @@ const (
 )
 
 // poolEntry represents a server node and stores its current state and statistics.
+// poolEntry表示服务器节点并存储其当前状态和统计信息。
 type poolEntry struct {
 	peer                  *peer
+	// 节点的secp256k1公钥
 	pubkey                [64]byte // secp256k1 key of the node
 	addr                  map[string]*poolEntryAddress
 	node                  *enode.Node
@@ -720,10 +725,14 @@ func (e *knownEntry) Weight() int64 {
 // multiple potential network addresses for a pool entry. This will be removed after
 // the final implementation of v5 discovery which will retrieve signed and serial
 // numbered advertisements, making it clear which IP/port is the latest one.
+// poolEntryAddress是一个单独的对象，因为当前有必要记住池条目的多个潜在网络地址。这将在v5发现的最终实现之后被删除，
+// 该发现将检索签名和序列编号的广告，使得清楚哪个IP /端口是最新的。
 type poolEntryAddress struct {
 	ip       net.IP
 	port     uint16
+	// 上次被发现，从db连接或加载
 	lastSeen mclock.AbsTime // last time it was discovered, connected or loaded from db
+	// 上次成功连接后的连接失败（持久）
 	fails    uint           // connection failures since last successful connection (persistent)
 }
 
@@ -740,6 +749,8 @@ func (a *poolEntryAddress) strKey() string {
 // and a short term value which is adjusted exponentially with a factor of
 // pstatRecentAdjust with each update and also returned exponentially to the
 // average with the time constant pstatReturnToMeanTC
+// poolStats实现具有长期平均值和短期值的特定数量的统计数据，该值通过每次更新的因子pstatRecentAdjust以指数方式调整，
+// 并且还以时间常数pstatReturnToMeanTC以指数方式返回到平均值
 type poolStats struct {
 	sum, weight, avg, recent float64
 	lastRecalc               mclock.AbsTime

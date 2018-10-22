@@ -46,6 +46,7 @@ var (
 // LightChain represents a canonical chain that by default only handles block
 // headers, downloading block bodies and receipts on demand through an ODR
 // interface. It only does header validation during chain insertion.
+// LightChain表示一个规范链，默认情况下只处理区块头，通过ODR接口按需下载区块体和收据。它仅在链插入期间执行区块头验证。
 type LightChain struct {
 	hc            *core.HeaderChain
 	indexerConfig *IndexerConfig
@@ -76,6 +77,7 @@ type LightChain struct {
 // NewLightChain returns a fully initialised light chain using information
 // available in the database. It initialises the default Ethereum header
 // validator.
+// NewLightChain使用数据库中提供的信息返回完全初始化的轻链。它初始化默认的以太坊头部验证器。
 func NewLightChain(odr OdrBackend, config *params.ChainConfig, engine consensus.Engine) (*LightChain, error) {
 	bodyCache, _ := lru.New(bodyCacheLimit)
 	bodyRLPCache, _ := lru.New(bodyCacheLimit)
@@ -164,6 +166,7 @@ func (self *LightChain) loadLastState() error {
 
 // SetHead rewinds the local chain to a new head. Everything above the new
 // head will be deleted and the new one set.
+// SetHead将本地链回滚到新的头部。新头部上方的所有内容都将被删除，新的头部将被设置。
 func (bc *LightChain) SetHead(head uint64) {
 	bc.mu.Lock()
 	defer bc.mu.Unlock()

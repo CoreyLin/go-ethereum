@@ -74,6 +74,7 @@ func (p Protocol) cap() Cap {
 }
 
 // Cap is the structure of a peer capability.
+// Cap是对等节点功能的结构。
 type Cap struct {
 	Name    string
 	Version uint

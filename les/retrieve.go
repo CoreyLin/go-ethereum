@@ -38,6 +38,7 @@ var (
 
 // retrieveManager is a layer on top of requestDistributor which takes care of
 // matching replies by request ID and handles timeouts and resends if necessary.
+// retrieveManager是requestDistributor之上的一个层，它负责按请求ID匹配回复并处理超时并在必要时重新发送。
 type retrieveManager struct {
 	dist       *requestDistributor
 	peers      *peerSet
@@ -100,6 +101,7 @@ const (
 )
 
 // newRetrieveManager creates the retrieve manager
+// newRetrieveManager创建检索管理器
 func newRetrieveManager(peers *peerSet, dist *requestDistributor, serverPool peerSelector) *retrieveManager {
 	return &retrieveManager{
 		peers:      peers,

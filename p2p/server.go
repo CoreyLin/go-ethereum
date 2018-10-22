@@ -229,27 +229,37 @@ const (
 
 // conn wraps a network connection with information gathered
 // during the two handshakes.
+// conn用两次握手期间收集的信息包装网络连接。
 type conn struct {
+	// Conn是一种通用的面向流的网络连接。
+	// 多个goroutine可以同时调用Conn上的方法。
 	fd net.Conn
 	transport
 	node  *enode.Node
 	flags connFlag
+	// 运行循环使用cont来向SetupConn发送信号错误。
 	cont  chan error // The run loop uses cont to signal errors to SetupConn.
+	// 协议握手后有效
 	caps  []Cap      // valid after the protocol handshake
+	// 协议握手后有效
 	name  string     // valid after the protocol handshake
 }
 
 type transport interface {
 	// The two handshakes.
+	// 两次握手
 	doEncHandshake(prv *ecdsa.PrivateKey, dialDest *ecdsa.PublicKey) (*ecdsa.PublicKey, error)
 	doProtoHandshake(our *protoHandshake) (*protoHandshake, error)
 	// The MsgReadWriter can only be used after the encryption
 	// handshake has completed. The code uses conn.id to track this
 	// by setting it to a non-nil value after the encryption handshake.
+	// MsgReadWriter只能在加密握手完成后使用。代码使用conn.id通过在加密握手后将其设置为非nil值来跟踪此情况。
 	MsgReadWriter
 	// transports must provide Close because we use MsgPipe in some of
 	// the tests. Closing the actual network connection doesn't do
 	// anything in those tests because NsgPipe doesn't use it.
+	// 传输必须提供Close，因为我们在某些测试中使用MsgPipe。关闭实际的网络连接在这些测试中没有做任何事情，因为MsgPipe不使用它。
+	// TODO Corey 注释有问题， 把NsgPipe改成MsgPipe
 	close(err error)
 }
 

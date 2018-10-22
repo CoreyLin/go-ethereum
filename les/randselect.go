@@ -24,11 +24,13 @@ import (
 // wrsItem interface should be implemented by any entries that are to be selected from
 // a weightedRandomSelect set. Note that recalculating monotonously decreasing item
 // weights on-demand (without constantly calling update) is allowed
+// wrsItem接口应该由要从weightedRandomSelect集中选择的任何条目实现。请注意，允许按需重新计算单调递减项目权重（不经常调用更新）
 type wrsItem interface {
 	Weight() int64
 }
 
 // weightedRandomSelect is capable of weighted random selection from a set of items
+// weightedRandomSelect能够从一组项目中进行加权随机选择
 type weightedRandomSelect struct {
 	root *wrsNode
 	idx  map[wrsItem]int
@@ -96,6 +98,7 @@ func (w *weightedRandomSelect) choose() wrsItem {
 const wrsBranches = 8 // max number of branches in the wrsNode tree
 
 // wrsNode is a node of a tree structure that can store wrsItems or further wrsNodes.
+// wrsNode是树结构的节点，可以存储wrsItems或更多wrsNodes。
 type wrsNode struct {
 	items                    [wrsBranches]interface{}
 	weights                  [wrsBranches]int64

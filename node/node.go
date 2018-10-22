@@ -470,6 +470,7 @@ func (n *Node) Stop() error {
 
 // Wait blocks the thread until the node is stopped. If the node is not running
 // at the time of invocation, the method immediately returns.
+// Wait阻塞线程，直到节点被停止。如果节点在调用时未运行，则该方法立即返回。
 func (n *Node) Wait() {
 	n.lock.RLock()
 	if n.server == nil {

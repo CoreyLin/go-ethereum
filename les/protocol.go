@@ -130,9 +130,13 @@ type announceBlock struct {
 }
 
 // announceData is the network packet for the block announcements.
+// announceData是区块通知的网络数据包。
 type announceData struct {
+	// 被宣布的一个特定区块的哈希
 	Hash       common.Hash // Hash of one particular block being announced
+	// 被宣布的一个特定区块的数量
 	Number     uint64      // Number of one particular block being announced
+	// 被宣布的一个特定区块的总难度
 	Td         *big.Int    // Total difficulty of one particular block being announced
 	ReorgDepth uint64
 	Update     keyValueList

@@ -37,6 +37,7 @@ import (
 )
 
 // EthAPIBackend implements ethapi.Backend for full nodes
+// EthAPIBackend为完整节点实现ethapi.Backend
 type EthAPIBackend struct {
 	eth *Ethereum
 	gpo *gasprice.Oracle

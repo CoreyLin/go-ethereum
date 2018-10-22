@@ -27,6 +27,7 @@ import (
 )
 
 // Config are the configuration options for the Interpreter
+// Config是Interpreter的配置选项
 type Config struct {
 	// Debug enabled debugging Interpreter options
 	Debug bool
@@ -36,6 +37,7 @@ type Config struct {
 	// delegate call and create.
 	NoRecursion bool
 	// Enable recording of SHA3/keccak preimages
+	// 启用S​​HA3 / keccak preimages的录制
 	EnablePreimageRecording bool
 	// JumpTable contains the EVM instruction table. This
 	// may be left uninitialised and will be set to the default
@@ -43,8 +45,10 @@ type Config struct {
 	JumpTable [256]operation
 
 	// Type of the EWASM interpreter
+	// EWASM解释器的类型
 	EWASMInterpreter string
 	// Type of the EVM interpreter
+	// EVM解释器的类型
 	EVMInterpreter string
 }
 

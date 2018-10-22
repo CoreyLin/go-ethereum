@@ -40,6 +40,7 @@ const (
 // lightFetcher implements retrieval of newly announced headers. It also provides a peerHasBlock function for the
 // ODR system to ensure that we only request data related to a certain block from peers who have already processed
 // and announced that block.
+// lightFetcher实现了对新发布的头部的检索。它还为ODR系统提供了peerHasBlock函数，以确保我们只从已经处理并宣布该区块的对等体请求与某个区块相关的数据。
 type lightFetcher struct {
 	pm    *ProtocolManager
 	odr   *LesOdr

@@ -82,10 +82,15 @@ func (m SchemeMap) NodeAddr(r *Record) []byte {
 }
 
 // Record represents a node record. The zero value is an empty record.
+// Record表示节点记录。零值是空记录。
 type Record struct {
+	// 序列号
 	seq       uint64 // sequence number
+	// 签名
 	signature []byte // the signature
+	// RLP编码记录
 	raw       []byte // RLP encoded record
+	// 所有键/值对的排序列表
 	pairs     []pair // sorted list of all key/value pairs
 }
 

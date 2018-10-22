@@ -62,14 +62,19 @@ const (
 	triesInMemory       = 128
 
 	// BlockChainVersion ensures that an incompatible database forces a resync from scratch.
+	// BlockChainVersion确保不兼容的数据库从头开始强制重新同步。
 	BlockChainVersion = 3
 )
 
 // CacheConfig contains the configuration values for the trie caching/pruning
 // that's resident in a blockchain.
+// CacheConfig包含驻留在区块链中的trie缓存/修剪的配置值。
 type CacheConfig struct {
+	// 是否禁用trie写入缓存（归档节点）
 	Disabled      bool          // Whether to disable trie write caching (archive node)
+	// 内存限制（MB），用于将当前内存中的trie刷新到磁盘
 	TrieNodeLimit int           // Memory limit (MB) at which to flush the current in-memory trie to disk
+	// 将当前内存中的trie刷新到磁盘的时间限制
 	TrieTimeLimit time.Duration // Time limit after which to flush the current in-memory trie to disk
 }
 
@@ -137,6 +142,7 @@ type BlockChain struct {
 // NewBlockChain returns a fully initialised block chain using information
 // available in the database. It initialises the default Ethereum Validator and
 // Processor.
+// NewBlockChain使用数据库中可用的信息返回完全初始化的区块链。它初始化默认的以太坊验证器和处理器。
 func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, chainConfig *params.ChainConfig, engine consensus.Engine, vmConfig vm.Config, shouldPreserve func(block *types.Block) bool) (*BlockChain, error) {
 	if cacheConfig == nil {
 		cacheConfig = &CacheConfig{

@@ -29,6 +29,7 @@ import (
 )
 
 // Constants to match up protocol versions and messages
+// 用于匹配协议版本和消息的常量
 const (
 	eth62 = 62
 	eth63 = 63
@@ -38,6 +39,7 @@ const (
 var ProtocolName = "eth"
 
 // ProtocolVersions are the supported versions of the eth protocol (first is primary).
+// ProtocolVersions是eth协议（首先是主要协议）的受支持版本。
 var ProtocolVersions = []uint{eth63, eth62}
 
 // ProtocolLengths are the number of implemented message corresponding to different protocol versions.

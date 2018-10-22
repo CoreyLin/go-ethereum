@@ -76,12 +76,17 @@ type MsgWriter interface {
 	//
 	// Note that messages can be sent only once because their
 	// payload reader is drained.
+	// WriteMsg发送消息。它将阻塞，直到消息的Payload已被另一端消耗。
+	//
+	// 请注意，消息只能发送一次，因为它们的有效负载读取器已耗尽。
 	WriteMsg(Msg) error
 }
 
 // MsgReadWriter provides reading and writing of encoded messages.
 // Implementations should ensure that ReadMsg and WriteMsg can be
 // called simultaneously from multiple goroutines.
+// MsgReadWriter提供编码消息的读写。
+// 实现应该确保可以从多个goroutine同时调用ReadMsg和WriteMsg。
 type MsgReadWriter interface {
 	MsgReader
 	MsgWriter

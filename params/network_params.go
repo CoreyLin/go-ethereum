@@ -22,17 +22,21 @@ package params
 const (
 	// BloomBitsBlocks is the number of blocks a single bloom bit section vector
 	// contains on the server side.
+	// BloomBitsBlocks是单个布隆位部分向量在服务器端包含的区块数。
 	BloomBitsBlocks uint64 = 4096
 
 	// BloomBitsBlocksClient is the number of blocks a single bloom bit section vector
 	// contains on the light client side
+	// BloomBitsBlocksClient是单个bloom位部分向量在轻客户端侧包含的区块数
 	BloomBitsBlocksClient uint64 = 32768
 
 	// BloomConfirms is the number of confirmation blocks before a bloom section is
 	// considered probably final and its rotated bits are calculated.
+	// BloomConfirms是在Bloom部分被认为可能是final并且计算其旋转位之前的确认区块的数量。
 	BloomConfirms = 256
 
 	// CHTFrequencyClient is the block frequency for creating CHTs on the client side.
+	// CHTFrequencyClient是在客户端创建CHT的区块频率。
 	CHTFrequencyClient = 32768
 
 	// CHTFrequencyServer is the block frequency for creating CHTs on the server side.
@@ -42,10 +46,12 @@ const (
 
 	// BloomTrieFrequency is the block frequency for creating BloomTrie on both
 	// server/client sides.
+	// BloomTrieFrequency是在服务器/客户端创建BloomTrie的块频率。
 	BloomTrieFrequency = 32768
 
 	// HelperTrieConfirmations is the number of confirmations before a client is expected
 	// to have the given HelperTrie available.
+	// HelperTrieConfirmations是客户预期可获得给定HelperTrie之前的确认数。
 	HelperTrieConfirmations = 2048
 
 	// HelperTrieProcessConfirmations is the number of confirmations before a HelperTrie
