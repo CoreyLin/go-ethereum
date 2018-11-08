@@ -44,12 +44,16 @@ var (
 	initCommand = cli.Command{
 		Action:    utils.MigrateFlags(initGenesis),
 		Name:      "init",
+		// Bootstrap并初始化一个新的创世区块
 		Usage:     "Bootstrap and initialize a new genesis block",
 		ArgsUsage: "<genesisPath>",
 		Flags: []cli.Flag{
 			utils.DataDirFlag,
 		},
 		Category: "BLOCKCHAIN COMMANDS",
+		// init命令初始化新的创世区块和网络定义。
+		// 这是一种破坏性行为，会改变你参加的网络。
+		// 它期望genesis文件作为参数。
 		Description: `
 The init command initializes a new genesis block and definition for the network.
 This is a destructive action and changes the network in which you will be
@@ -172,19 +176,30 @@ Use "ethereum dump 0" to dump the genesis block.`,
 
 // initGenesis will initialise the given JSON format genesis file and writes it as
 // the zero'd block (i.e. genesis) or will fail hard if it can't succeed.
+// initGenesis将初始化给定的JSON格式genesis文件并将其写为zero'd块（即genesis），否则如果不能成功则会失败。
 func initGenesis(ctx *cli.Context) error {
 	// Make sure we have a valid genesis JSON
+	// 确保我们有一个有效的genesis JSON
+	// First返回第一个参数，否则返回一个空字符串
 	genesisPath := ctx.Args().First()
 	if len(genesisPath) == 0 {
 		utils.Fatalf("Must supply path to genesis JSON file")
 	}
+	// Open打开指定的文件进行阅读。如果成功，返回文件上的方法可用于读取;关联的文件描述符具有模式O_RDONLY。
+	// 如果有错误，则其类型为*PathError。
 	file, err := os.Open(genesisPath)
 	if err != nil {
 		utils.Fatalf("Failed to read genesis file: %v", err)
 	}
+	// 关闭文件，使其无法用于I / O.
+	// 在支持SetDeadline的文件上，任何挂起的I / O操作都将被取消并立即返回并显示错误。
 	defer file.Close()
 
+	// new内置函数分配内存。第一个参数是类型，而不是值，返回的值是指向该类型新分配的零值的指针。
 	genesis := new(core.Genesis)
+	// NewDecoder返回一个从r读取的新解码器。
+	//
+	// 解码器引入了自己的缓冲，并且可以从r读取超出所请求的JSON值的数据。
 	if err := json.NewDecoder(file).Decode(genesis); err != nil {
 		utils.Fatalf("invalid genesis file: %v", err)
 	}
@@ -199,6 +214,7 @@ func initGenesis(ctx *cli.Context) error {
 		if err != nil {
 			utils.Fatalf("Failed to write genesis block: %v", err)
 		}
+		// 成功写入创世区块状态
 		log.Info("Successfully wrote genesis state", "database", name, "hash", hash)
 	}
 	return nil

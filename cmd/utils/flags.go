@@ -1666,6 +1666,13 @@ func MakeConsolePreloads(ctx *cli.Context) []string {
 // This allows the use of the existing configuration functionality.
 // When all flags are migrated this function can be removed and the existing
 // configuration functionality must be changed that is uses local flags
+// MigrateFlags在设置时从本地flag设置全局flag。
+// 这是一个临时函数，用于将旧命令/flag迁移到新格式。
+// e.g. geth account new --keystore /tmp/mykeystore --lightkdf
+// 在调用此方法后，它是等效的：
+// geth --keystore /tmp/mykeystore --lightkdf account new
+// 这允许使用现有的配置功能。
+// 迁移所有flag后，可以删除此功能，并且必须更改使用本地flag的现有配置功能
 func MigrateFlags(action func(ctx *cli.Context) error) func(*cli.Context) error {
 	return func(ctx *cli.Context) error {
 		for _, name := range ctx.FlagNames() {
