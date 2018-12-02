@@ -82,15 +82,19 @@ type Trie interface {
 }
 
 // NewDatabase creates a backing store for state. The returned database is safe for
-// concurrent use and retains cached trie nodes in memory. The pool is an optional
-// intermediate trie-node memory pool between the low level storage layer and the
-// high level trie abstraction.
-// NewDatabase为状态创建后备存储。返回的数据库对于并发使用是安全的，并且在内存中保留缓存的trie节点。池是低级存储层和高级trie抽象之间的可选中间trie节点内存池。
+// concurrent use and retains a few recent expanded trie nodes in memory. To keep
+// more historical state in memory, use the NewDatabaseWithCache constructor.
 func NewDatabase(db ethdb.Database) Database {
-	// 创建一个线程安全，固定大小为十万的LRU缓存
+	return NewDatabaseWithCache(db, 0)
+}
+
+// NewDatabase creates a backing store for state. The returned database is safe for
+// concurrent use and retains both a few recent expanded trie nodes in memory, as
+// well as a lot of collapsed RLP trie nodes in a large memory cache.
+func NewDatabaseWithCache(db ethdb.Database, cache int) Database {
 	csc, _ := lru.New(codeSizeCacheSize)
 	return &cachingDB{
-		db:            trie.NewDatabase(db),
+		db:            trie.NewDatabaseWithCache(db, cache),
 		codeSizeCache: csc,
 	}
 }

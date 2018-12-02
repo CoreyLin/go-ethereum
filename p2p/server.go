@@ -22,7 +22,6 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"net"
 	"sort"
 	"sync"
@@ -257,9 +256,7 @@ type transport interface {
 	MsgReadWriter
 	// transports must provide Close because we use MsgPipe in some of
 	// the tests. Closing the actual network connection doesn't do
-	// anything in those tests because NsgPipe doesn't use it.
-	// 传输必须提供Close，因为我们在某些测试中使用MsgPipe。关闭实际的网络连接在这些测试中没有做任何事情，因为MsgPipe不使用它。
-	// TODO Corey 注释有问题， 把NsgPipe改成MsgPipe
+	// anything in those tests because MsgPipe doesn't use it.
 	close(err error)
 }
 
@@ -422,7 +419,7 @@ type sharedUDPConn struct {
 func (s *sharedUDPConn) ReadFromUDP(b []byte) (n int, addr *net.UDPAddr, err error) {
 	packet, ok := <-s.unhandled
 	if !ok {
-		return 0, nil, fmt.Errorf("Connection was closed")
+		return 0, nil, errors.New("Connection was closed")
 	}
 	l := len(packet.Data)
 	if l > len(b) {
@@ -456,7 +453,7 @@ func (srv *Server) Start() (err error) {
 
 	// static fields
 	if srv.PrivateKey == nil {
-		return fmt.Errorf("Server.PrivateKey must be set to a non-nil key")
+		return errors.New("Server.PrivateKey must be set to a non-nil key")
 	}
 	if srv.newTransport == nil {
 		srv.newTransport = newRLPX
@@ -934,7 +931,7 @@ func (srv *Server) setupConn(c *conn, flags connFlag, dialDest *enode.Node) erro
 	if dialDest != nil {
 		dialPubkey = new(ecdsa.PublicKey)
 		if err := dialDest.Load((*enode.Secp256k1)(dialPubkey)); err != nil {
-			return fmt.Errorf("dial destination doesn't have a secp256k1 public key")
+			return errors.New("dial destination doesn't have a secp256k1 public key")
 		}
 	}
 	// Run the encryption handshake.
@@ -968,7 +965,7 @@ func (srv *Server) setupConn(c *conn, flags connFlag, dialDest *enode.Node) erro
 		return err
 	}
 	if id := c.node.ID(); !bytes.Equal(crypto.Keccak256(phs.ID), id[:]) {
-		clog.Trace("Wrong devp2p handshake identity", "phsid", fmt.Sprintf("%x", phs.ID))
+		clog.Trace("Wrong devp2p handshake identity", "phsid", hex.EncodeToString(phs.ID))
 		return DiscUnexpectedIdentity
 	}
 	c.caps, c.name = phs.Caps, phs.Name

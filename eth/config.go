@@ -45,15 +45,16 @@ var DefaultConfig = Config{
 		DatasetsInMem:  1,
 		DatasetsOnDisk: 2,
 	},
-	NetworkId:     1,
-	LightPeers:    100,
-	DatabaseCache: 768,
-	TrieCache:     256,
-	TrieTimeout:   60 * time.Minute,
-	MinerGasFloor: 8000000,
-	MinerGasCeil:  8000000,
-	MinerGasPrice: big.NewInt(params.GWei),
-	MinerRecommit: 3 * time.Second,
+	NetworkId:      1,
+	LightPeers:     100,
+	DatabaseCache:  512,
+	TrieCleanCache: 256,
+	TrieDirtyCache: 256,
+	TrieTimeout:    60 * time.Minute,
+	MinerGasFloor:  8000000,
+	MinerGasCeil:   8000000,
+	MinerGasPrice:  big.NewInt(params.GWei),
+	MinerRecommit:  3 * time.Second,
 
 	TxPool: core.DefaultTxPoolConfig,
 	GPO: gasprice.Config{
@@ -104,8 +105,8 @@ type Config struct {
 	DatabaseHandles    int  `toml:"-"`
 	// 单位是MB
 	DatabaseCache      int
-	// 单位是MB
-	TrieCache          int
+	TrieCleanCache     int
+	TrieDirtyCache     int
 	TrieTimeout        time.Duration
 
 	// Mining-related options
@@ -138,9 +139,7 @@ type Config struct {
 	// Miscellaneous options
 	DocRoot string `toml:"-"`
 
-	// Type of the EWASM interpreter ("" for detault)
-	// EWASM解释器的类型（默认是""）
-	// TODO Corey: for detault改为for default
+	// Type of the EWASM interpreter ("" for default)
 	EWASMInterpreter string
 	// Type of the EVM interpreter ("" for default)
 	// EVM解释器的类型（默认为“”）

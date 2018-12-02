@@ -16,7 +16,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/swarm/multihash"
 	"github.com/ethereum/go-ethereum/swarm/storage/feed"
 	colorable "github.com/mattn/go-colorable"
 	"github.com/pborman/uuid"
@@ -34,9 +33,9 @@ func cliFeedUploadAndSync(c *cli.Context) error {
 
 	defer func(now time.Time) { log.Info("total time", "time", time.Since(now), "size (kb)", filesize) }(time.Now())
 
-	generateEndpoints(scheme, cluster, from, to)
+	generateEndpoints(scheme, cluster, appName, from, to)
 
-	log.Info("generating and uploading MRUs to " + endpoints[0] + " and syncing")
+	log.Info("generating and uploading feeds to " + endpoints[0] + " and syncing")
 
 	// create a random private key to sign updates with and derive the address
 	pkFile, err := ioutil.TempFile("", "swarm-feed-smoke-test")
@@ -218,8 +217,7 @@ func cliFeedUploadAndSync(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	multihashHex := hexutil.Encode(multihash.ToMultihash(hashBytes))
-
+	multihashHex := hexutil.Encode(hashBytes)
 	fileHash, err := digest(f)
 	if err != nil {
 		return err
