@@ -139,6 +139,9 @@ var (
 )
 
 // SignerFn hashes and signs the data to be signed by a backing account.
+/*
+SignerFn对要由一个帐户签名的数据进行哈希和签名。
+ */
 type SignerFn func(signer accounts.Account, mimeType string, message []byte) ([]byte, error)
 
 // ecrecover extracts the Ethereum account address from a signed header.
@@ -168,6 +171,9 @@ func ecrecover(header *types.Header, sigcache *lru.ARCCache) (common.Address, er
 
 // Clique is the proof-of-authority consensus engine proposed to support the
 // Ethereum testnet following the Ropsten attacks.
+/*
+Clique是Ropsten攻击后提出的支持以太坊测试网的权威证明共识引擎。
+ */
 type Clique struct {
 	config *params.CliqueConfig // Consensus engine configuration parameters
 	db     ethdb.Database       // Database to store and retrieve snapshot checkpoints
@@ -564,6 +570,9 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *
 
 // Authorize injects a private key into the consensus engine to mint new blocks
 // with.
+/*
+Authorize向共识引擎注入一个私钥来挖掘新的区块。
+ */
 func (c *Clique) Authorize(signer common.Address, signFn SignerFn) {
 	c.lock.Lock()
 	defer c.lock.Unlock()

@@ -408,6 +408,9 @@ func (pool *TxPool) Stop() {
 
 // SubscribeNewTxsEvent registers a subscription of NewTxsEvent and
 // starts sending event to the given channel.
+/*
+SubscribeNewTxsEvent注册一个NewTxsEvent的订阅，并开始向给定的通道发送事件。
+ */
 func (pool *TxPool) SubscribeNewTxsEvent(ch chan<- NewTxsEvent) event.Subscription {
 	return pool.scope.Track(pool.txFeed.Subscribe(ch))
 }
@@ -422,6 +425,9 @@ func (pool *TxPool) GasPrice() *big.Int {
 
 // SetGasPrice updates the minimum price required by the transaction pool for a
 // new transaction, and drops all transactions below this threshold.
+/*
+SetGasPrice更新交易池为新交易所需的最低价格，并将所有此阈值以下的交易丢弃。
+ */
 func (pool *TxPool) SetGasPrice(price *big.Int) {
 	pool.mu.Lock()
 	defer pool.mu.Unlock()

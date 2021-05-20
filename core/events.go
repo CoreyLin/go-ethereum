@@ -36,8 +36,14 @@ type ChainEvent struct {
 	Logs  []*types.Log
 }
 
+/*
+ChainSideEvent指区块链中加入了一个新区块作为当前链头的旁支，worker会把这个区块收纳进possibleUncles[]数组，作为下一个挖掘新区块可能的Uncle之一。
+ */
 type ChainSideEvent struct {
 	Block *types.Block
 }
 
+/*
+ChainHeadEvent是指区块链中已经加入了一个新的区块作为整个链的链头。
+ */
 type ChainHeadEvent struct{ Block *types.Block }

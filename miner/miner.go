@@ -54,6 +54,9 @@ type Config struct {
 }
 
 // Miner creates blocks and searches for proof-of-work values.
+/*
+Miner创建区块并搜索工作量证明的值。
+ */
 type Miner struct {
 	mux      *event.TypeMux
 	worker   *worker
@@ -65,6 +68,9 @@ type Miner struct {
 	stopCh   chan struct{}
 }
 
+/*
+挖矿的入口。New了之后由*Ethereum.StartMining调用*Miner.Start开始挖矿。
+ */
 func New(eth Backend, config *Config, chainConfig *params.ChainConfig, mux *event.TypeMux, engine consensus.Engine, isLocalBlock func(block *types.Block) bool) *Miner {
 	miner := &Miner{
 		eth:     eth,
@@ -84,6 +90,10 @@ func New(eth Backend, config *Config, chainConfig *params.ChainConfig, mux *even
 // It's entered once and as soon as `Done` or `Failed` has been broadcasted the events are unregistered and
 // the loop is exited. This to prevent a major security vuln where external parties can DOS you with blocks
 // and halt your mining operation for as long as the DOS continues.
+/*
+update保持对下载器downloader事件的跟踪。请注意，这是一个一次性的update循环。它只被进入一次，一旦“Done”或“Failed”被广播，事件就会被取消注册，循环就会退出。
+这是为了防止一个重大的安全漏洞，即外部各方可以用区块DOS你，并停止你的挖矿操作，只要DOS继续。
+ */
 func (miner *Miner) update() {
 	events := miner.mux.Subscribe(downloader.StartEvent{}, downloader.DoneEvent{}, downloader.FailedEvent{})
 	defer func() {
@@ -130,6 +140,9 @@ func (miner *Miner) update() {
 			}
 		case addr := <-miner.startCh:
 			miner.SetEtherbase(addr)
+			/*
+			只有收到downloader.StartEvent时canStart才为false，这时说明Downloader模块正在同步，停止挖矿。
+			*/
 			if canStart {
 				miner.worker.start()
 			}
@@ -145,6 +158,9 @@ func (miner *Miner) update() {
 }
 
 func (miner *Miner) Start(coinbase common.Address) {
+	/*
+	把coinbase地址写入startCh通道。*Miner.update方法在监听startCh通道。
+	 */
 	miner.startCh <- coinbase
 }
 
@@ -196,6 +212,9 @@ func (miner *Miner) PendingBlock() *types.Block {
 
 func (miner *Miner) SetEtherbase(addr common.Address) {
 	miner.coinbase = addr
+	/*
+	setEtherbase设置用于初始化区块coinbase字段的etherbase。
+	 */
 	miner.worker.setEtherbase(addr)
 }
 

@@ -185,6 +185,9 @@ func (am *Manager) Accounts() []common.Address {
 // Find attempts to locate the wallet corresponding to a specific account. Since
 // accounts can be dynamically added to and removed from wallets, this method has
 // a linear runtime in the number of wallets.
+/*
+Find尝试找到与一个特定账户相对应的钱包。由于账户可以动态地添加到钱包中或从钱包中删除，因此该方法的运行时与钱包的数量成线性关系。
+ */
 func (am *Manager) Find(account Account) (Wallet, error) {
 	am.lock.RLock()
 	defer am.lock.RUnlock()

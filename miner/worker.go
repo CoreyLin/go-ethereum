@@ -43,9 +43,15 @@ const (
 
 	// txChanSize is the size of channel listening to NewTxsEvent.
 	// The number is referenced from the size of tx pool.
+	/*
+	txChanSize是监听NewTxsEvent的通道大小。这个数字来自交易池的大小。
+	 */
 	txChanSize = 4096
 
 	// chainHeadChanSize is the size of channel listening to ChainHeadEvent.
+	/*
+	chainHeadChanSize是监听ChainHeadEvent的通道大小。
+	 */
 	chainHeadChanSize = 10
 
 	// chainSideChanSize is the size of channel listening to ChainSideEvent.
@@ -59,6 +65,9 @@ const (
 
 	// minRecommitInterval is the minimal time interval to recreate the mining block with
 	// any newly arrived transactions.
+	/*
+	minRecommitInterval是用新到达的交易重新创建挖矿区块的最小时间间隔。
+	 */
 	minRecommitInterval = 1 * time.Second
 
 	// maxRecommitInterval is the maximum time interval to recreate the mining block with
@@ -74,6 +83,9 @@ const (
 	intervalAdjustBias = 200 * 1000.0 * 1000.0
 
 	// staleThreshold is the maximum depth of the acceptable stale block.
+	/*
+	staleThreshold是可接受陈旧区块的最大深度。
+	 */
 	staleThreshold = 7
 )
 
@@ -108,6 +120,9 @@ const (
 )
 
 // newWorkReq represents a request for new sealing work submitting with relative interrupt notifier.
+/*
+newWorkReq表示用相对interrupt notifier提交新的sealing工作的请求。
+ */
 type newWorkReq struct {
 	interrupt *int32
 	noempty   bool
@@ -167,7 +182,10 @@ type worker struct {
 	snapshotState *state.StateDB
 
 	// atomic status counters
-	running int32 // The indicator whether the consensus engine is running or not.
+	running int32 // The indicator whether the consensus engine is running or not.共识引擎是否正在运行。
+	/*
+	自上次sealing工作提交以来的新到交易数量。
+	 */
 	newTxs  int32 // New arrival transaction count since last sealing work submitting.
 
 	// noempty is the flag used to control whether the feature of pre-seal empty
@@ -200,8 +218,8 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 		remoteUncles:       make(map[common.Hash]*types.Block),
 		unconfirmed:        newUnconfirmedBlocks(eth.BlockChain(), miningLogAtDepth),
 		pendingTasks:       make(map[common.Hash]*task),
-		txsCh:              make(chan core.NewTxsEvent, txChanSize),
-		chainHeadCh:        make(chan core.ChainHeadEvent, chainHeadChanSize),
+		txsCh:              make(chan core.NewTxsEvent, txChanSize),//txChanSize = 4096
+		chainHeadCh:        make(chan core.ChainHeadEvent, chainHeadChanSize),//chainHeadChanSize = 10
 		chainSideCh:        make(chan core.ChainSideEvent, chainSideChanSize),
 		newWorkCh:          make(chan *newWorkReq),
 		taskCh:             make(chan *task),
@@ -212,24 +230,63 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 		resubmitAdjustCh:   make(chan *intervalAdjust, resubmitAdjustChanSize),
 	}
 	// Subscribe NewTxsEvent for tx pool
+	/*
+	为交易池订阅NewTxsEvent。有新的交易来的时候就会往txsCh写入NewTxsEvent，一旦读取到NewTxsEvent就知道有新交易来了。
+	SubscribeNewTxsEvent注册一个NewTxsEvent的订阅，并开始向给定的通道发送事件。此处的通道就是worker.txsCh。
+	 */
 	worker.txsSub = eth.TxPool().SubscribeNewTxsEvent(worker.txsCh)
 	// Subscribe events for blockchain
+	/*
+	订阅区块链事件。
+	SubscribeChainHeadEvent注册一个ChainHeadEvent的订阅。
+	ChainHeadEvent是指区块链中已经加入了一个新的区块作为整个链的链头，这时worker的回应是立即开始准备挖掘下一个新区块。
+	ChainHeadEvent并不一定是外部源发出。由于worker对象有个成员变量chain(eth.BlockChain)，所以当worker自己完成挖掘一个新区块，
+	并把它写入数据库，加进区块链里成为新的链头时，worker自己也可以调用chain发出一个ChainHeadEvent，从而被worker.update()函数监听到，进入下一次区块挖掘。
+	SubscribeChainSideEvent注册一个ChainSideEvent的订阅。
+	ChainSideEvent指区块链中加入了一个新区块作为当前链头的旁支，worker会把这个区块收纳进possibleUncles[]数组，作为下一个挖掘新区块可能的Uncle之一。
+	 */
 	worker.chainHeadSub = eth.BlockChain().SubscribeChainHeadEvent(worker.chainHeadCh)
 	worker.chainSideSub = eth.BlockChain().SubscribeChainSideEvent(worker.chainSideCh)
 
 	// Sanitize recommit interval if the user-specified one is too short.
+	/*
+	如果用户指定的重新提交间隔太短，则重置为最小重新提交间隔。
+	minRecommitInterval是用新到达的交易重新创建挖矿区块的最小时间间隔。
+	 */
 	recommit := worker.config.Recommit
 	if recommit < minRecommitInterval {
 		log.Warn("Sanitizing miner recommit interval", "provided", recommit, "updated", minRecommitInterval)
 		recommit = minRecommitInterval
 	}
 
+	/*
+	mainLoop是一个独立的goroutine，用于根据接收到的事件重新生成sealing任务。
+	seal执行具体的挖矿操作，以太坊共识算法有ethash和clique两种，所以对应着有两种Seal方法的实现。
+	 */
 	go worker.mainLoop()
+	/*
+	newWorkLoop是一个独立的goroutine，用于在接收到的事件上提交新的挖矿工作。
+	recommit是用新到达的交易重新创建挖矿区块的时间间隔。
+	 */
 	go worker.newWorkLoop(recommit)
+	/*
+	resultLoop是一个独立的goroutine，用于处理sealing结果的提交以及向数据库刷新相关数据。
+	 */
 	go worker.resultLoop()
+	/*
+	taskLoop是一个独立的goroutine，用于从生成器generator获取sealing任务并将其推送到共识引擎。
+	 */
 	go worker.taskLoop()
+	/*
+	上述四个loop都是for无限循环，无休无止地工作。
+	 */
 
 	// Submit first work to initialize pending state.
+	/*
+	提交第一个工作以初始化pending状态。
+	newWorkLoop中一直在监听startCh。
+	此处init是true。
+	 */
 	if init {
 		worker.startCh <- struct{}{}
 	}
@@ -237,6 +294,9 @@ func newWorker(config *Config, chainConfig *params.ChainConfig, engine consensus
 }
 
 // setEtherbase sets the etherbase used to initialize the block coinbase field.
+/*
+setEtherbase设置用于初始化区块coinbase字段的etherbase。
+ */
 func (w *worker) setEtherbase(addr common.Address) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
@@ -285,7 +345,13 @@ func (w *worker) pendingBlock() *types.Block {
 }
 
 // start sets the running status as 1 and triggers new work submitting.
+/*
+start将运行状态设置为1，并触发新的工作提交。
+ */
 func (w *worker) start() {
+	/*
+	&w.running表示共识引擎是否正在运行。1为在运行。
+	 */
 	atomic.StoreInt32(&w.running, 1)
 	w.startCh <- struct{}{}
 }
@@ -296,6 +362,9 @@ func (w *worker) stop() {
 }
 
 // isRunning returns an indicator whether worker is running or not.
+/*
+isRunning返回worker是否正在运行的一个指示器。
+ */
 func (w *worker) isRunning() bool {
 	return atomic.LoadInt32(&w.running) == 1
 }
@@ -333,32 +402,58 @@ func recalcRecommit(minRecommit, prev time.Duration, target float64, inc bool) t
 }
 
 // newWorkLoop is a standalone goroutine to submit new mining work upon received events.
+/*
+newWorkLoop是一个独立的goroutine，用于接收到事件后提交新的挖矿工作。
+ */
 func (w *worker) newWorkLoop(recommit time.Duration) {
 	var (
 		interrupt   *int32
-		minRecommit = recommit // minimal resubmit interval specified by user.
-		timestamp   int64      // timestamp for each round of mining.
+		minRecommit = recommit // minimal resubmit interval specified by user.用户指定的最小重新提交间隔。
+		timestamp   int64      // timestamp for each round of mining.每一轮挖矿的时间戳。
 	)
 
+	/*
+	NewTimer创建一个新的Timer，它将在至少持续时间d后在其通道上发送当前时间。timer.C是一个通道，会在d超时后收到当前时间。
+	 */
 	timer := time.NewTimer(0)
+	/*
+	方法return前停止计时器。
+	 */
 	defer timer.Stop()
 	<-timer.C // discard the initial tick
 
 	// commit aborts in-flight transaction execution with given signal and resubmits a new one.
+	/*
+	commit是一个func，将在给定信号的情况下终止正在执行的交易，并重新提交一个新的交易。被调用时才会执行。
+	 */
 	commit := func(noempty bool, s int32) {
 		if interrupt != nil {
 			atomic.StoreInt32(interrupt, s)
 		}
 		interrupt = new(int32)
 		select {
+		/*
+			mainLoop在监听newWorkCh，mainLoop执行Sealing。
+			newWorkReq表示用相对interrupt notifier提交新的sealing工作的请求。
+		 */
 		case w.newWorkCh <- &newWorkReq{interrupt: interrupt, noempty: noempty, timestamp: timestamp}:
 		case <-w.exitCh:
 			return
 		}
+		/*
+		Reset使timer重新开始计时，（本方法返回后再）等待时间段d过去后到期。如果调用时timer还在等待中会返回真；如果timer已经到期或者被停止了会返回假。
+		 */
 		timer.Reset(recommit)
+		/*
+		&w.newTxs是自上次sealing工作提交以来的新到交易数量。置为0，也就是说sealing工作提交后就没有新到的交易。
+		 */
 		atomic.StoreInt32(&w.newTxs, 0)
 	}
 	// clearPending cleans the stale pending tasks.
+	/*
+	clearPending是一个方法，用于清除陈旧的挂起任务。被调用时才执行。
+	staleThreshold = 7。即落后指定区块（通常为当前最新区块）7个区块以上的任务被清除。
+	 */
 	clearPending := func(number uint64) {
 		w.pendingMu.Lock()
 		for h, t := range w.pendingTasks {
@@ -372,11 +467,24 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 	for {
 		select {
 		case <-w.startCh:
+			/*
+			在newWorker的时候就对startCh通道进行了写入，代表开始事件。
+			基于本节点的最高区块号，清除陈旧的挂起任务。
+			 */
 			clearPending(w.chain.CurrentBlock().NumberU64())
+			/*
+			获取当前时间戳，单位为秒，用作区块时间。
+			 */
 			timestamp = time.Now().Unix()
+			/*
+			noempty为false说明可以为空
+			 */
 			commit(false, commitInterruptNewHead)
 
 		case head := <-w.chainHeadCh:
+			/*
+			收到了新区块。
+			 */
 			clearPending(head.Block.NumberU64())
 			timestamp = time.Now().Unix()
 			commit(false, commitInterruptNewHead)
@@ -384,12 +492,25 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 		case <-timer.C:
 			// If mining is running resubmit a new work cycle periodically to pull in
 			// higher priced transactions. Disable this overhead for pending blocks.
+			/*
+			如果挖矿正在运行，则定期重新提交一个新的工作周期，以引入/吸入价格更高的交易。为挂起的区块禁用此开销。
+			w.chainConfig.Clique.Period指PoA共识下，两个区块间隔的秒数。
+			 */
 			if w.isRunning() && (w.chainConfig.Clique == nil || w.chainConfig.Clique.Period > 0) {
 				// Short circuit if no new transaction arrives.
+				/*
+				newTxs是自上次sealing工作提交以来的新到交易数量。如果为0，则进入下一次循环。
+				 */
 				if atomic.LoadInt32(&w.newTxs) == 0 {
+					/*
+					重置之后，<-timer.C又可以收到值
+					 */
 					timer.Reset(recommit)
 					continue
 				}
+				/*
+				noempty为false说明不可以为空
+				 */
 				commit(true, commitInterruptResubmit)
 			}
 
@@ -430,6 +551,10 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 }
 
 // mainLoop is a standalone goroutine to regenerate the sealing task based on the received event.
+/*
+mainLoop是一个独立的goroutine，用于根据接收到的事件重新生成sealing任务。
+seal执行具体的挖矿操作，以太坊共识算法有ethash和clique两种，所以对应着有两种Seal方法的实现。
+ */
 func (w *worker) mainLoop() {
 	defer w.txsSub.Unsubscribe()
 	defer w.chainHeadSub.Unsubscribe()
@@ -532,6 +657,9 @@ func (w *worker) mainLoop() {
 
 // taskLoop is a standalone goroutine to fetch sealing task from the generator and
 // push them to consensus engine.
+/*
+taskLoop是一个独立的goroutine，用于从生成器generator获取sealing任务并将其推送到共识引擎。
+ */
 func (w *worker) taskLoop() {
 	var (
 		stopCh chan struct{}
@@ -579,6 +707,9 @@ func (w *worker) taskLoop() {
 
 // resultLoop is a standalone goroutine to handle sealing result submitting
 // and flush relative data to the database.
+/*
+resultLoop是一个独立的goroutine，用于处理sealing结果的提交以及向数据库刷新相关数据。
+ */
 func (w *worker) resultLoop() {
 	for {
 		select {

@@ -2491,11 +2491,18 @@ func (bc *BlockChain) SubscribeChainEvent(ch chan<- ChainEvent) event.Subscripti
 }
 
 // SubscribeChainHeadEvent registers a subscription of ChainHeadEvent.
+/*
+SubscribeChainHeadEvent注册一个ChainHeadEvent的订阅。ChainHeadEvent是指区块链中已经加入了一个新的区块作为整个链的链头。
+ */
 func (bc *BlockChain) SubscribeChainHeadEvent(ch chan<- ChainHeadEvent) event.Subscription {
 	return bc.scope.Track(bc.chainHeadFeed.Subscribe(ch))
 }
 
 // SubscribeChainSideEvent registers a subscription of ChainSideEvent.
+/*
+SubscribeChainSideEvent注册一个ChainSideEvent的订阅。
+ChainSideEvent指区块链中加入了一个新区块作为当前链头的旁支，worker会把这个区块收纳进possibleUncles[]数组，作为下一个挖掘新区块可能的Uncle之一。
+ */
 func (bc *BlockChain) SubscribeChainSideEvent(ch chan<- ChainSideEvent) event.Subscription {
 	return bc.scope.Track(bc.chainSideFeed.Subscribe(ch))
 }

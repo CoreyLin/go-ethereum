@@ -76,6 +76,9 @@ type Ethereum struct {
 	chainDb ethdb.Database // Block chain database
 
 	eventMux       *event.TypeMux
+	/*
+	共识引擎，与算法无关，是一个interface。
+	 */
 	engine         consensus.Engine
 	accountManager *accounts.Manager
 
@@ -94,6 +97,9 @@ type Ethereum struct {
 
 	p2pServer *p2p.Server
 
+	/*
+	保护可变字段(例如gas price和etherbase)
+	 */
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
 }
 
@@ -441,46 +447,89 @@ func (s *Ethereum) SetEtherbase(etherbase common.Address) {
 // StartMining starts the miner with the given number of CPU threads. If mining
 // is already running, this method adjust the number of threads allowed to use
 // and updates the minimum price required by the transaction pool.
+/*
+StartMining以给定的CPU线程数启动矿机。如果挖矿已经在运行，则此方法调整允许使用的线程数，并更新交易池所需的最低价格。
+ */
 func (s *Ethereum) StartMining(threads int) error {
 	// Update the thread count within the consensus engine
+	/*
+	更新共识引擎中的线程数。
+	 */
 	type threaded interface {
 		SetThreads(threads int)
 	}
+	/*
+	consensus.Engine接口转换为threaded接口，如果转换成功，说明共识引擎提供了设置线程的方法，支持设置线程数，那么就设置线程数。
+	 */
 	if th, ok := s.engine.(threaded); ok {
 		log.Info("Updated mining threads", "threads", threads)
 		if threads == 0 {
-			threads = -1 // Disable the miner from within
+			threads = -1 // Disable the miner from within 禁用矿机
 		}
 		th.SetThreads(threads)
 	}
 	// If the miner was not running, initialize it
+	/*
+	如果矿机没有运行，则初始化它。
+	 */
 	if !s.IsMining() {
 		// Propagate the initial price point to the transaction pool
+		/*
+		将初始价格点传播到交易池。
+		加读锁，读锁锁定期间，可以读，不能写。
+		 */
 		s.lock.RLock()
 		price := s.gasPrice
 		s.lock.RUnlock()
+		/*
+		SetGasPrice更新交易池为新交易所需的最低价格，并将所有此阈值以下的交易丢弃。
+		 */
 		s.txPool.SetGasPrice(price)
 
 		// Configure the local mining address
+		/*
+		配置本地挖矿地址，即挖矿所用的账户地址
+		 */
 		eb, err := s.Etherbase()
 		if err != nil {
 			log.Error("Cannot start mining without etherbase", "err", err)
 			return fmt.Errorf("etherbase missing: %v", err)
 		}
+		/*
+		如果是权威证明PoA
+		 */
 		if clique, ok := s.engine.(*clique.Clique); ok {
+			/*
+			Find尝试找到与一个特定账户相对应的钱包。由于账户可以动态地添加到钱包中或从钱包中删除，因此该方法的运行时与钱包的数量成线性关系。
+			Account表示位于可选URL字段定义的一个特定位置的以太坊账户。
+			 */
 			wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
 			if wallet == nil || err != nil {
 				log.Error("Etherbase account unavailable locally", "err", err)
 				return fmt.Errorf("signer missing: %v", err)
 			}
+			/*
+			Authorize向clique共识引擎注入一个私钥来挖掘新的区块。
+			SignData是一个方法，SignData请求钱包对给定数据的hash进行签名，这里是传一个方法进去。
+			 */
 			clique.Authorize(eb, wallet.SignData)
 		}
 		// If mining is started, we can disable the transaction rejection mechanism
 		// introduced to speed sync times.
+		/*
+		如果启动挖矿，我们可以禁用为了加快同步时间而引入的交易拒绝机制。
+		acceptTxs设置为1表示接受交易，不拒绝交易。
+		 */
 		atomic.StoreUint32(&s.handler.acceptTxs, 1)
 
+		/*
+		启动挖矿
+		 */
 		go s.miner.Start(eb)
 	}
+	/*
+	没有错误，返回nil
+	 */
 	return nil
 }
 

@@ -30,6 +30,9 @@ import (
 
 // Account represents an Ethereum account located at a specific location defined
 // by the optional URL field.
+/*
+Account表示位于可选URL字段定义的一个特定位置的以太坊账户。
+ */
 type Account struct {
 	Address common.Address `json:"address"` // Ethereum account address derived from the key
 	URL     URL            `json:"url"`     // Optional resource locator within a backend
